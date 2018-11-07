@@ -36,7 +36,7 @@ for i in range(25):
     plt.grid(False)
     plt.imshow(train_images[i], cmap=plt.cm.binary)
     plt.xlabel(class_names[train_labels[i]])
-
+plt.show()
 #####################################################################################
 # Build the model
 #####################################################################################
@@ -105,7 +105,7 @@ def plot_value_array(i, predictions_array, true_label):
  
   thisplot[predicted_label].set_color('red')
   thisplot[true_label].set_color('blue')
-  
+
 # Plot the first X test images, their predicted label, and the true label
 # Color correct predictions in blue, incorrect predictions in red
 num_rows = 5
@@ -117,14 +117,16 @@ for i in range(num_images):
   plot_image(i, predictions, test_labels, test_images)
   plt.subplot(num_rows, 2*num_cols, 2*i+2)
   plot_value_array(i, predictions, test_labels)
+plt.show()
 
 # Make prediction
 # Add the image to a batch where it's the only member.
+img = test_images[0]
 img = (np.expand_dims(img,0))
 predictions_single = model.predict(img)
 plot_value_array(0, predictions_single, test_labels)
 _ = plt.xticks(range(10), class_names, rotation=45)
-
+plt.show()
 
 
 
