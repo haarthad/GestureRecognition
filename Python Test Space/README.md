@@ -1,4 +1,4 @@
-[Project Home](../)
+[Project Home](../..)
 # Project Test Space
 ## Purpose
 This space is intended to be used as a place where useful tests, examples, and notes can be kept to easily pull down on different machines. If someone puts up a useful example or prototype program then it can also be easily looked at and referenced by others. 
