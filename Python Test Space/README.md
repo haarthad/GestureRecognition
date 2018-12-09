@@ -3,12 +3,12 @@
 ## Purpose
 This space is intended to be used as a place where useful tests, examples, and notes can be kept to easily pull down on different machines. If someone puts up a useful example or prototype program then it can also be easily looked at and referenced by others. 
 ## Folder Links
-[Adam](/Colton)
+[Adam](../../../Python Test Space/Adam)
 
-[Colton](/Colton)
+[Colton](../../../Python Test Space/Colton)
 
-[Connor](/Colton)
+[Connor](../../../Python Test Space/Connor)
 
-[Kevin](/Colton)
+[Kevin](../../../Python Test Space/Kevin)
 
-[Michael](/Colton)
+[Michael](../../../Python Test Space/Michael)
