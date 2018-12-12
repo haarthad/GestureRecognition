@@ -28,7 +28,7 @@
 
 LIBRARY ieee;
 USE ieee. std_logic_1164.all;
-USE iee.numeric_std.all;
+USE ieee.numeric_std.all;
 USE ieee. std_logic_arith.all;
 USE ieee. std_logic_unsigned.all;
  
