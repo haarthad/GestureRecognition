@@ -41,7 +41,7 @@ ARCHITECTURE structural OF CameraCollector IS
 --=======================================
 -- Declare States
 --=======================================
-TYPE state_type IS (AWAIT_ENABLE, RESTART, AWAIT_FRAME, AWAIT_ROW, COLLECT, AWAIT_FINISH); 
+TYPE state_type IS (AWAIT_ENABLE, RESTART, AWAIT_FRAME, COLLECT, AWAIT_FINISH); 
 SIGNAL nstate : state_type;
 SIGNAL pstate : state_type;
 
@@ -67,28 +67,28 @@ END COMPONENT;
 --========================================
 -- Signal Declarations
 --========================================
-SIGNAL pixelCount        : INTEGER := 0;
-SIGNAL rowCount          : INTEGER := 0;
-SIGNAL write_en_wire     : STD_LOGIC;
-SIGNAL write_select_wire : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0);
-SIGNAL write_data_wire   : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0);
-SIGNAL selectA_wire      : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0);
-SIGNAL selectB_wire      : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0); 
-SIGNAL selectC_wire      : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0); 
-SIGNAL selectD_wire      : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0); 
-SIGNAL out_regA_wire     : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0);
-SIGNAL out_regB_wire     : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0);
-SIGNAL out_regC_wire     : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0);
-SIGNAL out_regD_wire     : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0);
-SIGNAL lval_delayed      : STD_LOGIC := '0'; 
-SIGNAL lval_edge         : STD_LOGIC;
+SIGNAL pixelCount        : INTEGER := 0; --\/
+SIGNAL rowCount          : INTEGER := 0; --\/
+SIGNAL write_en_wire     : STD_LOGIC; --\/
+SIGNAL write_select_wire : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0); --\/
+SIGNAL write_data_wire   : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0); --\/
+SIGNAL selectA_wire      : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0) := (OTHERS => '0');
+SIGNAL selectB_wire      : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0) := (OTHERS => '0'); 
+SIGNAL selectC_wire      : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0) := (OTHERS => '0'); 
+SIGNAL selectD_wire      : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0) := (OTHERS => '0'); 
+SIGNAL out_regA_wire     : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0) := (OTHERS => '0');
+SIGNAL out_regB_wire     : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0) := (OTHERS => '0');
+SIGNAL out_regC_wire     : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0) := (OTHERS => '0');
+SIGNAL out_regD_wire     : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0) := (OTHERS => '0');
+SIGNAL lval_delayed      : STD_LOGIC := '0'; --\/
+SIGNAL lval_edge         : STD_LOGIC; --\/
 
 BEGIN
 --========================================
 -- Map Components
 --========================================
 ----------========================================
----------- Front and Back Buffers
+---------- Front/Back Buffer
 ----------========================================
 buffers: RegFile_1_4_12
 PORT MAP(
@@ -131,36 +131,22 @@ BEGIN
          END IF;
          
       WHEN RESTART => 
-         --TODO: reset required variables
 			nstate <= AWAIT_FRAME;
          
       WHEN AWAIT_FRAME =>
          IF (i_finished = '1') THEN
             nstate <= RESTART;
          ELSIF (i_fval = '1') THEN
-            nstate <= AWAIT_ROW;
-			ELSE
-				nstate <= AWAIT_FRAME;
-         END IF;
-         
-      WHEN AWAIT_ROW =>
-         IF (i_finished = '1') THEN
-            nstate <= RESTART;
-         ELSIF (i_lval = '1') THEN
-				--TODO: Be wary of an off by one error between
-				--this state and the next
             nstate <= COLLECT;
 			ELSE
-				nstate <= AWAIT_ROW;
+				nstate <= AWAIT_FRAME;
          END IF;
          
       WHEN COLLECT =>
          IF (i_finished = '1') THEN
             nstate <= RESTART;
-         ELSIF (i_lval = '0') THEN
-            nstate <= AWAIT_ROW;
-			--TODO: ELSIF recieved all pixel wait for finish THEN
-			--nstate <= AWAIT_FINISH;
+			ELSIF (pixelCount = 307200) THEN
+				nstate <= AWAIT_FINISH;
 			ELSE
 				nstate <= COLLECT;
          END IF;
@@ -179,13 +165,51 @@ BEGIN
    END CASE;
 END PROCESS;
 
---iterate through regfile using the pixelCount as an index
-write_select_wire <= STD_LOGIC_VECTOR(TO_UNSIGNED(pixelCount, write_select_wire'length));
-
+--grab a pixel if in COLLECT state and increment pixel count.
+--also increments row count
+collectPixel : PROCESS(i_clk, i_finished)
+BEGIN
+	IF(i_finished = '1') THEN
+		pixelCount   <= 0;
+		rowCount     <= 0;
+		write_select_wire <= (OTHERS => '0');
+	ELSIF(RISING_EDGE(i_clk)) THEN
+		IF(pstate = COLLECT) THEN
+			IF(i_lval = '1') THEN
+				write_en_wire <= '1';
+				pixelCount    <= pixelCount + 1;
+				--increment the write address of the front/back buffer
+				IF(unsigned(write_select_wire) < ((PICTURE_WIDTH * 4) - 1)) THEN
+					write_select_wire <= std_logic_vector( unsigned(write_select_wire) + 1 );
+				ELSE
+					write_select_wire <= (OTHERS => '0');
+				END IF;
+			ELSE
+				write_en_wire <= '0';
+			END IF;
+			--used for i_lval falling edge detection
+			lval_delayed <= i_lval;
+			--if i_lval had a falling edge increment rowCount
+			IF(lval_edge = '1') THEN
+				IF(rowCount < 3) THEN
+					rowCount <= rowCount + 1;
+				ELSE
+					rowCount <= 0;
+				END IF;
+			END IF;
+		END IF;
+	END IF;
+END PROCESS;
 --i_lval falling edge detection. lval_edge strobes high one clock period when
---i_lval toggles from high to low.
-lval_delayed <= i_lval WHEN RISING_EDGE(i_clk); 
+--i_lval toggles from high to low. This works because of the process rowCounting.
 lval_edge <= lval_delayed AND NOT i_lval; 
- 
+
+--look at rowCount to see which buffer we are using. If rowCount is 0 or 1, we are in front buffer,
+--if rowCount is 2 or 3, we are in back buffer.
+
+--selectA_wire <= (OTHERS => '0');
+--selectB_wire <= (OTHERS => '0'); 
+--selectC_wire <= (OTHERS => '0'); 
+--selectD_wire <= (OTHERS => '0'); 
 
 END structural;
