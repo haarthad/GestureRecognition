@@ -31,20 +31,11 @@
 LIBRARY ieee;
 USE ieee. std_logic_1164.all;
 USE ieee.numeric_std.all;
-USE ieee. std_logic_arith.all;
 USE ieee. std_logic_unsigned.all;
-
---=======================================
--- Declare Constants
---=======================================
---camera frame is 640x480
-CONSTANT PICTURE_WIDTH : INTEGER := 480; 
---the number of bits required to store 480*4 as a binary number
-CONSTANT REG_NUM_BIN   : INTEGER := INTEGER(FLOOR(LOG2(REAL(480*4))+1));
---the width of a pixel
-CONSTANT PIXEL_WIDTH : INTEGER := 12;
+USE work.CAMERA_PACK.all;
  
 ENTITY RegFile_1_4_12 IS
+
 PORT( 
 	i_clk          : IN STD_LOGIC;
 	i_write_en     : IN STD_LOGIC;
