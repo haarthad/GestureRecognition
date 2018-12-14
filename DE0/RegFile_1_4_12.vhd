@@ -7,12 +7,6 @@
 --Author: Michael Dougherty
 --Start Date: 12/2/2018
 
---GENERICS:
---PICTURE_WIDTH       : the number of registers in the regfile
---REG_NUM_BIN : floor(log2(PICTURE_WIDTH) + 1)
---                  the number of bits needed to represent PICTURE_WIDTH
---                  in binary
---PIXEL_WIDTH        : the number of bits in each register
 --INPUTS:
 --i_clk          : input clock
 --i_write_en     : enable latching of data on i_write_data
@@ -54,7 +48,7 @@ END RegFile_1_4_12;
  
 ARCHITECTURE behavioral OF RegFile_1_4_12 IS
 --========================================
--- Signal Declarations
+-- SRAM Declaration
 --========================================
 	TYPE reg_array IS ARRAY(0 TO ((PICTURE_WIDTH * 4) - 1)) OF STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0);
 	SIGNAL regFile : reg_array;

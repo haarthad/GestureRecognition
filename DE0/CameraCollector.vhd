@@ -42,18 +42,18 @@ ARCHITECTURE structural OF CameraCollector IS
 -- Declare States
 --=======================================
 TYPE state_type IS (AWAIT_ENABLE, RESTART, AWAIT_FRAME, COLLECT, AWAIT_FINISH); 
-SIGNAL nstate : state_type;
-SIGNAL pstate : state_type;
+SIGNAL nstate : state_type := AWAIT_ENABLE;
+SIGNAL pstate : state_type := AWAIT_ENABLE;
 
 --=======================================
 -- Declare Components
 --=======================================
 COMPONENT RegFile_1_4_12 IS
 PORT( 
-	i_clk          : IN STD_LOGIC;
-	i_write_en     : IN STD_LOGIC;
-	i_write_select : IN STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0);
-	i_write_data   : IN STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0);
+	i_clk          : IN STD_LOGIC; --\/
+	i_write_en     : IN STD_LOGIC; --\/
+	i_write_select : IN STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0); --\/
+	i_write_data   : IN STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0); --\/
 	i_selectA      : IN STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0);
 	i_selectB      : IN STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0);
 	i_selectC      : IN STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0);
@@ -62,6 +62,21 @@ PORT(
 	o_regB         : OUT STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0);
 	o_regC         : OUT STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0);
 	o_regD         : OUT STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0)
+);
+END COMPONENT;
+COMPONENT ImageStore IS
+PORT( 
+	i_clk          : IN STD_LOGIC;
+	i_swapped      : IN STD_LOGIC;
+	i_finished     : IN STD_LOGIC;
+	i_regA         : IN STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0);
+	i_regB         : IN STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0);
+	i_regC         : IN STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0);
+	i_regD         : IN STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0);
+	o_selectA      : OUT STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0);
+	o_selectB      : OUT STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0);
+	o_selectC      : OUT STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0);
+	o_selectD      : OUT STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0)
 );
 END COMPONENT;
 --========================================
@@ -82,6 +97,7 @@ SIGNAL out_regC_wire     : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0) := (OTHERS
 SIGNAL out_regD_wire     : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0) := (OTHERS => '0');
 SIGNAL lval_delayed      : STD_LOGIC := '0'; --\/
 SIGNAL lval_edge         : STD_LOGIC; --\/
+SIGNAL i_swapped_wire    : STD_LOGIC;
 
 BEGIN
 --========================================
@@ -92,7 +108,7 @@ BEGIN
 ----------========================================
 buffers: RegFile_1_4_12
 PORT MAP(
-	i_clk           => i_clk,
+	i_clk          => i_clk,
 	i_write_en     => write_en_wire,
 	i_write_select => write_select_wire,
 	i_write_data   => i_pixel_data,
@@ -102,13 +118,30 @@ PORT MAP(
 	i_selectD      => selectD_wire,
 	o_regA         => out_regA_wire,
 	o_regB         => out_regB_wire,
-	o_regC         => out_regB_wire,
-	o_regD         => out_regB_wire
+	o_regC         => out_regC_wire,
+	o_regD         => out_regD_wire
+);
+----------========================================
+---------- ImageStore
+----------========================================
+store: ImageStore
+PORT MAP(
+	i_clk      => i_clk,
+	i_swapped  => i_swapped_wire,
+	i_finished => i_finished,
+	i_regA     => out_regA_wire,
+	i_regB     => out_regB_wire,
+	i_regC     => out_regC_wire,
+	i_regD     => out_regD_wire,
+	o_selectA  => selectA_wire,
+	o_selectB  => selectB_wire,
+	o_selectC  => selectC_wire,
+	o_selectD  => selectD_wire
 );
 --========================================
 -- Local Architecture
 --========================================
---CLOCKL THE STATE
+--CLOCK THE STATE
 state_reg : PROCESS(i_clk, i_finished)
 BEGIN
 	IF (i_finished = '1') THEN 
@@ -179,8 +212,15 @@ BEGIN
 				write_en_wire <= '1';
 				pixelCount    <= pixelCount + 1;
 				--increment the write address of the front/back buffer
-				IF(unsigned(write_select_wire) < ((PICTURE_WIDTH * 4) - 1)) THEN
-					write_select_wire <= std_logic_vector( unsigned(write_select_wire) + 1 );
+				IF(UNSIGNED(write_select_wire) < ((PICTURE_WIDTH * 4) - 1)) THEN
+					write_select_wire <= STD_LOGIC_VECTOR(UNSIGNED(write_select_wire) + 1 );
+					IF(UNSIGNED(write_select_wire) = ((PICTURE_WIDTH * 2) - 1)) THEN
+						i_swapped_wire <= '1';
+					ELSIF(UNSIGNED(write_select_wire) = ((PICTURE_WIDTH * 4) - 1)) THEN
+						i_swapped_wire <= '1';
+					ELSE
+						i_swapped_wire <= '0';
+					END IF;
 				ELSE
 					write_select_wire <= (OTHERS => '0');
 				END IF;
@@ -206,10 +246,5 @@ lval_edge <= lval_delayed AND NOT i_lval;
 
 --look at rowCount to see which buffer we are using. If rowCount is 0 or 1, we are in front buffer,
 --if rowCount is 2 or 3, we are in back buffer.
-
---selectA_wire <= (OTHERS => '0');
---selectB_wire <= (OTHERS => '0'); 
---selectC_wire <= (OTHERS => '0'); 
---selectD_wire <= (OTHERS => '0'); 
 
 END structural;
