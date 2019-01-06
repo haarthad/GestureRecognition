@@ -17,13 +17,15 @@ personal_test_data = 'ImageData/PersonalTest'
 class_names = ['A','B','C','Five','Point','V']
 X_OF_IMAGES = 50
 Y_OF_IMAGES = 50
-NUMBER_OF_EPOCHS = 20
+NUMBER_OF_EPOCHS = 100
 
 ###############################################################################
 # Methods
 ###############################################################################
 def assignHotLabel(image):
 	label = image.split('-')[0]
+	hot_label = np.array([0,0,0,0,0,0])
+
 	if label == 'A':
 		hot_label = np.array([1,0,0,0,0,0])
 	elif label == 'B':
@@ -44,7 +46,6 @@ def trainData():
 		path = os.path.join(train_data, i)
 		image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 		image = cv2.resize(image, (X_OF_IMAGES, Y_OF_IMAGES))
-		#image = tf.image.sobel_edges(image)
 		train_images.append([np.array(image), assignHotLabel(i)])
 	shuffle(train_images)
 	return train_images
@@ -106,40 +107,55 @@ def plot_value_array(i, predictions_array, true_label):
 ###############################################################################
 # Main logic
 ###############################################################################
+
+# Read in images and attach a label to each image
 training_image_list = trainData()
 testing_image_list = testData()
 personal_testing_image_list = personalTestData()
 
+# Reshape images to be passed through the convolution layers
 training_images = np.array([i[0] for i in training_image_list]).reshape(-1,X_OF_IMAGES,Y_OF_IMAGES,1)
 training_labels     = np.array([i[1] for i in training_image_list])
-
 testing_images = np.array([i[0] for i in testing_image_list]).reshape(-1,X_OF_IMAGES,Y_OF_IMAGES,1)
 testing_labels     = np.array([i[1] for i in testing_image_list])
-
 personal_testing_images = np.array([i[0] for i in personal_testing_image_list]).reshape(-1,X_OF_IMAGES,Y_OF_IMAGES,1)
 personal_testing_labels     = np.array([i[1] for i in personal_testing_image_list])
 
-map(lambda x:x.tf.image.sobel_edges(), training_images)
-map(lambda x:x.tf.image.sobel_edges(), testing_images)
-map(lambda x:x.tf.image.sobel_edges(), personal_testing_images)
+# Pass all images through a Sobel filter
+#map(lambda x:tf.image.sobel_edges(x), training_images)
+#map(lambda x:tf.image.sobel_edges(x), testing_images)
+#map(lambda x:tf.image.sobel_edges(x), personal_testing_images)
 
+# Preprocess all images so the values for each images fall between 0 and 1
 training_images = training_images / 255.0
 testing_images = testing_images / 255.0
 personal_testing_images = personal_testing_images / 255.0
 
+# Set parameters and layers for the model
 model = keras.Sequential([
-	keras.layers.Flatten(input_shape=(X_OF_IMAGES,Y_OF_IMAGES,1)),
-        keras.layers.Dense(128, activation=tf.nn.relu),
-#        keras.layers.Dropout(rate=0.5),
-	keras.layers.Dense(6, activation=tf.nn.softmax)
+	keras.layers.InputLayer(input_shape=[X_OF_IMAGES,Y_OF_IMAGES,1]),
+	keras.layers.Conv2D(filters=32, kernel_size=5, strides=1, padding='same', activation='relu'),
+	keras.layers.MaxPool2D(pool_size=5, padding='same'),
+	keras.layers.Conv2D(filters=50, kernel_size=5, strides=1, padding='same', activation='relu'),
+	keras.layers.MaxPool2D(pool_size=5, padding='same'),
+	keras.layers.Conv2D(filters=80, kernel_size=5, strides=1, padding='same', activation='relu'),
+	keras.layers.MaxPool2D(pool_size=5, padding='same'),
+	keras.layers.Dropout(0.25),
+	keras.layers.Flatten(),
+    keras.layers.Dense(512, activation=tf.nn.relu),
+	keras.layers.Dropout(0.5),
+	keras.layers.Dense(6, activation=tf.nn.softmax),
 ])
 
-model.compile(optimizer=tf.train.AdamOptimizer(),
+# Compile model with the following parameters
+model.compile(optimizer=tf.train.AdamOptimizer(0.001),
 			  loss='categorical_crossentropy',
 			  metrics=['accuracy'])
-			  
+
+# Create model based on above parameters for the training images
 model.fit(training_images,training_labels,epochs=NUMBER_OF_EPOCHS)
 
+# Calculate and print accuracy for training, test, and personal test images
 training_loss, training_accuracy = model.evaluate(training_images, training_labels)
 testing_loss, testing_accuracy = model.evaluate(testing_images, testing_labels)
 personal_loss, personal_accuracy = model.evaluate(personal_testing_images, personal_testing_labels)
@@ -147,9 +163,11 @@ print('Training accuracy:', training_accuracy)
 print('Testing accuracy:', testing_accuracy)
 print('Personal testing accuracy:', personal_accuracy)
 
-
+# Get category percentages for all test images
 predictions = model.predict(testing_images)
 
+# Print the first 25 test images, and their predicted values for each category
+# Uncomment plt.show to see the plot
 num_rows = 5
 num_cols = 5
 num_images = num_rows*num_cols
