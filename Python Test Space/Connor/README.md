@@ -15,10 +15,10 @@ You will need the following libraries in order to run these scripts:
 Additionally, you will need to place your own credentials JSON in the root directory:
 [Google API Walthrough](https://developers.google.com/calendar/quickstart/python)
 
-###Deployment
+### Deployment
 Literally just run it through the console.
 
-###Authors
+### Authors
 * Connor Kroll
 * [ddunkijaco](https://github.com/ddunkijaco/shellScores) - original sports script
 
