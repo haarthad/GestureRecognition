@@ -1,4 +1,5 @@
-import sys, time, pygame
+import sys, time
+from pygame import mixer
 
 def Timer():
     sec = 0
@@ -16,9 +17,10 @@ def Timer():
         else:
             looper = False
 
-    pygame.init()
-    pygame.mixer.music.load('\Assets\Alert.mp3')
-    pygame.mixer.music.play()
+# https://stackoverflow.com/questions/2936914/pygame-sounds-dont-play
+    mixer.init()
+    sound = mixer.Sound('Assets\Slrt.wav')
+    sound.play()
     time.sleep(3)
 
 
