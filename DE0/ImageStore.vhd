@@ -194,6 +194,7 @@ BEGIN
 			sramIndex <= sramIndex;
 		END IF;
 		regFile(sramIndex) <= greyscalePixel;
+		o_sram <=  regFile(TO_INTEGER(UNSIGNED(i_selectSram)));
 	END IF;
 END PROCESS;
 
@@ -201,7 +202,5 @@ o_selectA <= STD_LOGIC_VECTOR(TO_UNSIGNED(regA, o_selectA'LENGTH));
 o_selectB <= STD_LOGIC_VECTOR(TO_UNSIGNED(regB, o_selectB'LENGTH));
 o_selectC <= STD_LOGIC_VECTOR(TO_UNSIGNED(regC, o_selectC'LENGTH));
 o_selectD <= STD_LOGIC_VECTOR(TO_UNSIGNED(regD, o_selectD'LENGTH));
-
-o_sram <=  regFile(TO_INTEGER(UNSIGNED(i_selectSram)));
 
 END structural;

@@ -110,7 +110,7 @@ SIGNAL lval_edge         : STD_LOGIC; --\/
 SIGNAL i_swapped_wire    : STD_LOGIC; --\/
 SIGNAL i_finished        : STD_LOGIC; --\/
 SIGNAL send_count        : INTEGER := 0;
-SIGNAL transmit_delay    : STD_LOGIC := '0';
+SIGNAL transmit_delay    : INTEGER := 0;
 SIGNAL selectSram_wire   : STD_LOGIC_VECTOR(GREYSCALE_REG_NUM_BIN-1 DOWNTO 0); --\/
 SIGNAL sram_wire         : STD_LOGIC_VECTOR(GREYSCALE_PIXEL_WIDTH - 1 DOWNTO 0); --\/
 
@@ -260,27 +260,33 @@ END PROCESS;
 
 -------****WORKING HERE****-------
 --transmit greyscale pixels if in AWAIT_FINISH state
-transmit : PROCESS(i_clk)
+transmit : PROCESS(i_clk, i_finished)
 BEGIN
-	IF(RISING_EDGE(i_clk)) THEN
+	IF(i_finished = '1') THEN
+	
+	ELSIF(RISING_EDGE(i_clk)) THEN
 		IF(pstate = AWAIT_FINISH) THEN
 			o_valid_frame <= '1';
-			--transmit_delay is to create delay shown in signalling diagram
-			IF(transmit_delay = '0') THEN
+			IF(transmit_delay = 0) THEN
 				o_pixel_data <= sram_wire;
-				
-				
-				
+				transmit_delay <= transmit_delay + 1;
+
+			ELSIF(transmit_delay = 1) THEN
+				o_valid_pixel <= '1';
+				transmit_delay <= transmit_delay + 1;
+			
+			ELSIF(transmit_delay < TRANSMIT_DELAY_MAX) THEN
 				IF(i_pixel_read = '1') THEN
-					transmit_delay <= '1';
+					o_valid_pixel <= '0';
+					transmit_delay <= 0;
 					send_count <= send_count + 1;
 				ELSE
-					transmit_delay <= '0';
+					o_valid_pixel <= '1';
+					transmit_delay <= transmit_delay + 1;
 					send_count <= send_count;
 				END IF;
 			ELSE
-				o_pixel_data <= o_pixel_data;
-				transmit_delay <= '0';
+				
 			END IF;
 		ELSE
 			o_valid_frame <= '0';
@@ -289,6 +295,10 @@ BEGIN
 END PROCESS;
 
 selectSram_wire <= STD_LOGIC_VECTOR(TO_UNSIGNED(send_count, selectSram_wire'LENGTH));
+
+i_finished <= '1' WHEN send_count = (TRANSMIT_NUMBER - 1) ELSE
+				  '1' WHEN transmit_delay = TRANSMIT_DELAY_MAX ELSE
+	           '0';
 
 
 --i_lval falling edge detection. lval_edge strobes high one clock period when
