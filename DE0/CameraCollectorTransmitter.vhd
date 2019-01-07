@@ -1,5 +1,5 @@
 --Owner: Senior Design Team Delta
---Component: Camera Collector
+--Component: Camera Collector and Transmitter
 --Description: After the camera is configured, this component monitors the
 --             camera outputs and grabs image data when valid. This component
 --             only grabs the data, and then passes the data along to another
@@ -15,6 +15,10 @@
 --i_pixel_data : the pixel information output by the D5M at each epoch
 --i_lval       : line-valid signal from the D5M
 --i_fval       : frame_valid signal from the D5M
+--i_pixel_read : from the transmission pins, signalling a pixel has been recieved
+--o_pixel_data : the greyscale pixel output to the transmission pins
+--o_valid_frame: signals that frame is being transmitted
+--o_valid_pixel: signals that pixel on transmission pins is valid
 --i_finished   : pulse triggers a reset and new image collection/transfer
 --***See TRDB-D5M Hardware Specification page 5 for further detail of D5M signals***
 --OUTPUTS:
@@ -25,18 +29,22 @@ USE ieee.std_logic_1164.all;
 USE ieee.numeric_std.all;
 USE ieee.math_real.all;
 USE work.CAMERA_PACK.all;
-ENTITY CameraCollector IS
+ENTITY CameraCollectorTransmitter IS
 PORT(
 	i_clk              : IN STD_LOGIC;
 	i_en               : IN STD_LOGIC;
 	i_pixel_data       : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
 	i_lval             : IN STD_LOGIC;
 	i_fval             : IN STD_LOGIC;
-	i_finished         : IN STD_LOGIC
+	--i_finished       : IN STD_LOGIC;
+	i_pixel_read       : IN STD_LOGIC;
+	o_pixel_data       : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+	o_valid_frame      : OUT STD_LOGIC;
+	o_valid_pixel      : OUT STD_LOGIC
 );
-END CameraCollector;
+END CameraCollectorTransmitter;
 
-ARCHITECTURE structural OF CameraCollector IS
+ARCHITECTURE structural OF CameraCollectorTransmitter IS
 
 --=======================================
 -- Declare States
@@ -73,10 +81,12 @@ PORT(
 	i_regB         : IN STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0); --\/
 	i_regC         : IN STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0); --\/
 	i_regD         : IN STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0); --\/
+	i_selectSram   : IN STD_LOGIC_VECTOR(GREYSCALE_REG_NUM_BIN -1 DOWNTO 0);
 	o_selectA      : OUT STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0); --\/
 	o_selectB      : OUT STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0); --\/
 	o_selectC      : OUT STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0); --\/
-	o_selectD      : OUT STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0)  --\/
+	o_selectD      : OUT STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0);  --\/
+	o_sram         : OUT STD_LOGIC_VECTOR(GREYSCALE_PIXEL_WIDTH - 1 DOWNTO 0)
 );
 END COMPONENT;
 --========================================
@@ -98,6 +108,11 @@ SIGNAL out_regD_wire     : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0) := (OTHERS
 SIGNAL lval_delayed      : STD_LOGIC := '0'; --\/
 SIGNAL lval_edge         : STD_LOGIC; --\/
 SIGNAL i_swapped_wire    : STD_LOGIC; --\/
+SIGNAL i_finished        : STD_LOGIC; --\/
+SIGNAL send_count        : INTEGER := 0;
+SIGNAL transmit_delay    : STD_LOGIC := '0';
+SIGNAL selectSram_wire   : STD_LOGIC_VECTOR(GREYSCALE_REG_NUM_BIN-1 DOWNTO 0); --\/
+SIGNAL sram_wire         : STD_LOGIC_VECTOR(GREYSCALE_PIXEL_WIDTH - 1 DOWNTO 0); --\/
 
 BEGIN
 --========================================
@@ -126,17 +141,19 @@ PORT MAP(
 ----------========================================
 store: ImageStore
 PORT MAP(
-	i_clk      => i_clk,
-	i_swapped  => i_swapped_wire,
-	i_finished => i_finished,
-	i_regA     => out_regA_wire,
-	i_regB     => out_regB_wire,
-	i_regC     => out_regC_wire,
-	i_regD     => out_regD_wire,
-	o_selectA  => selectA_wire,
-	o_selectB  => selectB_wire,
-	o_selectC  => selectC_wire,
-	o_selectD  => selectD_wire
+	i_clk        => i_clk,
+	i_swapped    => i_swapped_wire,
+	i_finished   => i_finished,
+	i_regA       => out_regA_wire,
+	i_regB       => out_regB_wire,
+	i_regC       => out_regC_wire,
+	i_regD       => out_regD_wire,
+	i_selectSram => selectSram_wire,
+	o_selectA    => selectA_wire,
+	o_selectB    => selectB_wire,
+	o_selectC    => selectC_wire,
+	o_selectD    => selectD_wire,
+	o_sram       => sram_wire
 );
 --========================================
 -- Local Architecture
@@ -240,6 +257,40 @@ BEGIN
 		END IF;
 	END IF;
 END PROCESS;
+
+-------****WORKING HERE****-------
+--transmit greyscale pixels if in AWAIT_FINISH state
+transmit : PROCESS(i_clk)
+BEGIN
+	IF(RISING_EDGE(i_clk)) THEN
+		IF(pstate = AWAIT_FINISH) THEN
+			o_valid_frame <= '1';
+			--transmit_delay is to create delay shown in signalling diagram
+			IF(transmit_delay = '0') THEN
+				o_pixel_data <= sram_wire;
+				
+				
+				
+				IF(i_pixel_read = '1') THEN
+					transmit_delay <= '1';
+					send_count <= send_count + 1;
+				ELSE
+					transmit_delay <= '0';
+					send_count <= send_count;
+				END IF;
+			ELSE
+				o_pixel_data <= o_pixel_data;
+				transmit_delay <= '0';
+			END IF;
+		ELSE
+			o_valid_frame <= '0';
+		END IF;
+	END IF;
+END PROCESS;
+
+selectSram_wire <= STD_LOGIC_VECTOR(TO_UNSIGNED(send_count, selectSram_wire'LENGTH));
+
+
 --i_lval falling edge detection. lval_edge strobes high one clock period when
 --i_lval toggles from high to low. This works because of the process rowCounting.
 lval_edge <= lval_delayed AND NOT i_lval; 

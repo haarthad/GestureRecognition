@@ -50,7 +50,7 @@ ARCHITECTURE behavioral OF RegFile_1_4_12 IS
 --========================================
 -- SRAM Declaration
 --========================================
-	TYPE reg_array IS ARRAY(0 TO ((PICTURE_WIDTH * 4) - 1)) OF STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0);
+	TYPE reg_array IS ARRAY(74+0 TO ((PICTURE_WIDTH * 4) - 1)) OF STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0);
 	SIGNAL regFile : reg_array;
 --========================================
 -- Local Architecture

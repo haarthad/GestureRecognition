@@ -16,11 +16,13 @@
 --i_regB         : colored pixel B from front/back buffer
 --i_regC         : colored pixel C from front/back buffer
 --i_regD         : colored pixel D from front/back buffer
+--i_selectSram   : select which greyscale pixel stored in SRAM to output
 --OUTPUTS:
 --o_selectA      : select colored pixel A from front/back buffer
 --o_selectB      : select colored pixel B from front/back buffer
 --o_selectC      : select colored pixel C from front/back buffer
---o_selectD      : select colored pixel D from front/back buffer``
+--o_selectD      : select colored pixel D from front/back buffer
+--o_sram         : greyscale pixel stored in SRAM selected by i_selectSram
 
 LIBRARY ieee;
 USE ieee. std_logic_1164.all;
@@ -38,10 +40,12 @@ PORT(
 	i_regB         : IN STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0);
 	i_regC         : IN STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0);
 	i_regD         : IN STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0);
+	i_selectSram   : IN STD_LOGIC_VECTOR(GREYSCALE_REG_NUM_BIN - 1 DOWNTO 0);
 	o_selectA      : OUT STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0);
 	o_selectB      : OUT STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0);
 	o_selectC      : OUT STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0);
-	o_selectD      : OUT STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0)
+	o_selectD      : OUT STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0);
+	o_sram         : OUT STD_LOGIC_VECTOR(GREYSCALE_PIXEL_WIDTH - 1 DOWNTO 0)
 );
 END ImageStore;
  
@@ -152,6 +156,7 @@ BEGIN
 			--grab four Bayer pattern pixels and convert them to a single greyscale pixel
 			--it looks nasty, but there are just a lot of type conversions
 			greyscalePixel <= STD_LOGIC_VECTOR(TO_UNSIGNED((((TO_INTEGER(UNSIGNED(i_regA)) + TO_INTEGER(UNSIGNED(i_regD)))/2)+TO_INTEGER(UNSIGNED(i_regB))+TO_INTEGER(UNSIGNED(i_regC)))/3,greyscalePixel'LENGTH));
+			sramIndex <= sramIndex + 1;
 			IF(regB < 639) THEN 
 				regA <= regA + 2;
 				regB <= regB + 2;
@@ -166,10 +171,12 @@ BEGIN
 			regB      <= 1281;
 			regC      <= 1920;
 			regD      <= 1921;
+			sramIndex <= sramIndex;
 		ELSIF(pstate = DRAIN_BACK) THEN
 			--grab four Bayer pattern pixels and convert them to a single greyscale pixel
 			--it looks nasty, but there are just a lot of type conversions
 			greyscalePixel <= STD_LOGIC_VECTOR(TO_UNSIGNED((((TO_INTEGER(UNSIGNED(i_regA)) + TO_INTEGER(UNSIGNED(i_regD)))/2)+TO_INTEGER(UNSIGNED(i_regB))+TO_INTEGER(UNSIGNED(i_regC)))/3,greyscalePixel'LENGTH));
+			sramIndex <= sramIndex + 1;
 			IF(regB < 1919) THEN 
 				regA <= regA + 2;
 				regB <= regB + 2;
@@ -184,6 +191,7 @@ BEGIN
 			regB      <= 1;
 			regC      <= 640;
 			regD      <= 641;
+			sramIndex <= sramIndex;
 		END IF;
 		regFile(sramIndex) <= greyscalePixel;
 	END IF;
@@ -193,5 +201,7 @@ o_selectA <= STD_LOGIC_VECTOR(TO_UNSIGNED(regA, o_selectA'LENGTH));
 o_selectB <= STD_LOGIC_VECTOR(TO_UNSIGNED(regB, o_selectB'LENGTH));
 o_selectC <= STD_LOGIC_VECTOR(TO_UNSIGNED(regC, o_selectC'LENGTH));
 o_selectD <= STD_LOGIC_VECTOR(TO_UNSIGNED(regD, o_selectD'LENGTH));
+
+o_sram <=  regFile(TO_INTEGER(UNSIGNED(i_selectSram)));
 
 END structural;
