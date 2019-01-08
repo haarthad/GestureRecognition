@@ -56,7 +56,7 @@ SIGNAL pstate : state_type := AWAIT_ENABLE;
 --=======================================
 -- Declare Components
 --=======================================
-COMPONENT RegFile_1_4_12 IS
+COMPONENT RAM_1_4_12 IS
 PORT( 
 	i_clk          : IN STD_LOGIC; --\/
 	i_write_en     : IN STD_LOGIC; --\/
@@ -121,7 +121,7 @@ BEGIN
 ----------========================================
 ---------- Front/Back Buffer
 ----------========================================
-buffers: RegFile_1_4_12
+buffers: RAM_1_4_12
 PORT MAP(
 	i_clk          => i_clk,
 	i_write_en     => write_en_wire,

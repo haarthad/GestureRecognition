@@ -1,9 +1,12 @@
 --Owner: Senior Design Team Delta
 --Component: RegFile_1_4_12
---Description: This component was going to be a register file with
+--Description: This component was going to be a single register file with
 --             1 write port, 4 read ports, with 12 bit registers.
---             This regfile does not support bypassing inputs 
---             directly to outputs
+--             However, Quartus cannot infer this type of RAM
+--             and so will synthesize this component as a regfile
+--             which takes up a LOT more LABs and ALMs. So we will
+--             use two stacked 1 write 2 read rams to create a single
+--             1 write 4 read ram.
 --Author: Michael Dougherty
 --Start Date: 12/2/2018
 
