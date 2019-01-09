@@ -6,15 +6,15 @@ from tqdm import tqdm
 import tensorflow as tf
 from tensorflow import keras
 import matplotlib.pyplot as plt
-
+from PIL import Image
 
 ###############################################################################
 # Defines
 ###############################################################################
 TRAINING_DATA  = 'ImageData/Train'
 TESTING_DATA   = 'ImageData/Test'
-PERSONAL_TESTING_DATA = 'ImageData/PersonalTest'
-GESTURE_NAMES = ['A','B','C','Five','Point','V']
+EXTRA_TESTING_DATA = 'ImageData/ExtraTest'
+GESTURE_NAMES = ['A','B','C','G','V']
 X_OF_IMAGES = 64
 Y_OF_IMAGES = 64
 NUMBER_OF_EPOCHS = 10
@@ -32,20 +32,18 @@ def selectLabel(image):
 	# Get beginning of filename. This defines each gesture is shown in the
 	# image.
 	gesture = image.split('-')[0]
-	label = np.array([0,0,0,0,0,0])
+	label = np.array([0,0,0,0,0])
 
 	if gesture == 'A':
-		label = np.array([1,0,0,0,0,0])
+		label = np.array([1,0,0,0,0])
 	elif gesture == 'B':
-		label = np.array([0,1,0,0,0,0])
+		label = np.array([0,1,0,0,0])
 	elif gesture == 'C':
-		label = np.array([0,0,1,0,0,0])
-	elif gesture == 'Five':
-		label = np.array([0,0,0,1,0,0])
-	elif gesture == 'Point':
-		label = np.array([0,0,0,0,1,0])
+		label = np.array([0,0,1,0,0])
+	elif gesture == 'Point' or 'G':
+		label = np.array([0,0,0,1,0])
 	elif gesture == 'V':
-		label = np.array([0,0,0,0,0,1])
+		label = np.array([0,0,0,0,1])
 	return label
 
 """
@@ -59,10 +57,10 @@ def loadTrainingData():
 		path = os.path.join(TRAINING_DATA, i)
 		image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 		image = cv2.resize(image, (X_OF_IMAGES, Y_OF_IMAGES))
-		#noise = image + np.random.normal(0.0,10.0, image.shape)
+		noise = image + np.random.normal(0.0,10.0, image.shape)
 		label = selectLabel(i)
 		train_images.append([np.array(image), label])
-		#train_images.append([np.array(noise), label])
+		train_images.append([np.array(noise), label])
 	shuffle(train_images)
 	return train_images
 
@@ -88,8 +86,8 @@ labels attached.
 """
 def loadPersonalTestingData():
 	personal_test_images = []
-	for i in tqdm(os.listdir(PERSONAL_TESTING_DATA)):
-		path = os.path.join(PERSONAL_TESTING_DATA, i)
+	for i in tqdm(os.listdir(EXTRA_TESTING_DATA)):
+		path = os.path.join(EXTRA_TESTING_DATA, i)
 		image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 		image = cv2.resize(image, (X_OF_IMAGES, Y_OF_IMAGES))
 		personal_test_images.append([np.array(image), selectLabel(i)])
@@ -136,7 +134,7 @@ def plot_value_array(i, predictions_array, true_label):
 	plt.grid(False)
 	plt.xticks([])
 	plt.yticks([])
-	thisplot = plt.bar(range(6), predictions_array, color="#777777")
+	thisplot = plt.bar(range(5), predictions_array, color="#777777")
 	plt.ylim([0, 1])
 	predicted_label = np.argmax(predictions_array)
  
@@ -151,6 +149,8 @@ def plot_value_array(i, predictions_array, true_label):
 training_image_list = loadTrainingData()
 testing_image_list = loadTestingData()
 personal_testing_image_list = loadPersonalTestingData()
+
+training_image_list += testing_image_list[0:500]
 
 # Reshape images to be passed through the convolution layers
 training_images = np.array([i[0] for i in training_image_list])\
@@ -201,7 +201,7 @@ model = keras.Sequential([
 	keras.layers.Flatten(),
 	keras.layers.Dense(512, activation=tf.nn.relu),
 	keras.layers.Dropout(0.5),
-	keras.layers.Dense(6, activation=tf.nn.softmax),
+	keras.layers.Dense(5, activation=tf.nn.softmax),
 ])
 
 # Compile model with the following parameters
@@ -210,7 +210,9 @@ model.compile(optimizer=tf.train.AdamOptimizer(),
 			  metrics=['accuracy'])
 
 # Create model based on above parameters for the training images
-model.fit(training_images,training_labels,epochs=NUMBER_OF_EPOCHS,
+model.fit(training_images,
+		  training_labels,
+		  epochs=NUMBER_OF_EPOCHS,
 		  batch_size=32)
 
 # Calculate and print accuracy for training, test, and personal test images
@@ -225,17 +227,17 @@ print('Testing accuracy:', testing_accuracy)
 print('Personal testing accuracy:', personal_accuracy)
 
 # Get category percentages for all test images
-predictions = model.predict(testing_images)
+predictions = model.predict(personal_testing_images)
 
 # Print the first 25 test images, and their predicted values for each category
 # Uncomment plt.show to see the plot
-num_rows = 5
-num_cols = 5
+num_rows = 4
+num_cols = 2
 num_images = num_rows*num_cols
 plt.figure(figsize=(2*2*num_cols, 2*num_rows))
 for i in range(num_images):
 	plt.subplot(num_rows, 2*num_cols, 2*i+1)
-	plot_image(i, predictions, testing_labels, testing_image_list)
+	plot_image(i, predictions, personal_testing_labels, personal_testing_image_list)
 	plt.subplot(num_rows, 2*num_cols, 2*i+2)
-	plot_value_array(i, predictions, testing_labels)
+	plot_value_array(i, predictions, personal_testing_labels)
 plt.show()
