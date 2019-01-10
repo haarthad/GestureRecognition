@@ -1,8 +1,0 @@
-Wiki for RPi.GPIO
-	https://sourceforge.net/p/raspberry-gpio-python/wiki/Examples/
-Example and description of interrupts with RPi.GPIO
-	https://raspi.tv/how-to-use-interrupts-with-python-on-the-raspberry-pi-and-rpi-gpio-part-3 
-Multithreading python tut
-	https://www.tutorialspoint.com/python/python_multithreading.htm
-Description of how pass by value/reference works in python 
-	https://stackoverflow.com/questions/986006/how-do-i-pass-a-variable-by-reference
