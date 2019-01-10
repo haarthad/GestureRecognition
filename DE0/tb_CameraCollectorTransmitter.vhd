@@ -20,6 +20,7 @@ ARCHITECTURE behavioral OF tb_CameraCollectorTransmitter IS
 COMPONENT CameraCollectorTransmitter IS
 PORT(
 	i_clk              : IN STD_LOGIC;
+	i_pixclk				 : IN STD_LOGIC;
 	i_en               : IN STD_LOGIC;
 	i_pixel_data       : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
 	i_lval             : IN STD_LOGIC;
@@ -51,10 +52,10 @@ BEGIN
 --generate the clock signal
 clock1_gen: PROCESS -- no sensitivity list
 BEGIN
- i_clk <= '0';
- WAIT FOR T_clk/2;
- i_clk <= '1';
- WAIT FOR T_clk/2;
+	i_clk <= '0';
+	WAIT FOR T_clk/2;
+	i_clk <= '1';
+	WAIT FOR T_clk/2;
 END PROCESS;
 
 --========================================
@@ -76,12 +77,20 @@ PORT MAP(
 --========================================
 -- TESTING
 --========================================
---from 0 to 20 cycles test i_en. Should see state transition from awaitEnable, to restart, to awaitFrame.
+--0 to 20 cycles test i_en. Should see state transition from awaitEnable, to restart, to awaitFrame.
+--25 to 50 cycles test i_pixel_read high for 20 cycles asserts i_finished and state moves to restart.
+--55 to 70 cycles test i_fval going high changes state from await_frame to collect
 i_en <= '0','1' AFTER 20*T_clk;
 --i_pixel_data <= "000000000000";
 i_lval <= '0';
-i_fval <= '0';
+i_fval <= '0', '1' AFTER 55*T_clk;
 i_pixel_read <= '0', '1' AFTER 25*T_clk, '0' AFTER 50*T_clk;
+
+--generate pixel data from camera
+pixel_gen: PROCESS
+BEGIN
+	
+
 
 END behavioral;	
 

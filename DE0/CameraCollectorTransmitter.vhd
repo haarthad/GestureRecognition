@@ -11,6 +11,7 @@
 
 --INPUTS:
 --i_clk        : input clock (50 MHz)
+--i_pixclk     : clock from camera for latching pixel data
 --i_en         : enable collection of pixel data from the camera
 --i_pixel_data : the pixel information output by the D5M at each epoch
 --i_lval       : line-valid signal from the D5M
@@ -32,6 +33,7 @@ USE work.CAMERA_PACK.all;
 ENTITY CameraCollectorTransmitter IS
 PORT(
 	i_clk              : IN STD_LOGIC;
+	i_pixclk				 : IN STD_LOGIC;
 	i_en               : IN STD_LOGIC;
 	i_pixel_data       : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
 	i_lval             : IN STD_LOGIC;
@@ -113,7 +115,7 @@ SIGNAL send_count        : INTEGER := 0;
 SIGNAL transmit_delay    : INTEGER := 0;
 SIGNAL selectSram_wire   : STD_LOGIC_VECTOR(GREYSCALE_REG_NUM_BIN-1 DOWNTO 0); --\/
 SIGNAL sram_wire         : STD_LOGIC_VECTOR(GREYSCALE_PIXEL_WIDTH - 1 DOWNTO 0); --\/
-SIGNAL timeoutCount      : INTEGER := 0; --\/
+SIGNAL timeout_count      : INTEGER := 0; --\/
 
 BEGIN
 --========================================
@@ -263,28 +265,33 @@ END PROCESS;
 transmit : PROCESS(i_clk, i_finished)
 BEGIN
 	IF(i_finished = '1') THEN
-	
+		o_pixel_data <= o_pixel_data;
+		o_valid_pixel <= '0';
+		o_valid_frame <= '0';
+		transmit_delay <= 0;
+		send_count <= 0;
 	ELSIF(RISING_EDGE(i_clk)) THEN
 		IF(pstate = AWAIT_FINISH) THEN
 			o_valid_frame <= '1';
-			IF(transmit_delay = 0) THEN
-				o_pixel_data <= sram_wire;
-				transmit_delay <= transmit_delay + 1;
-			ELSIF(transmit_delay = 1) THEN
-				o_valid_pixel <= '1';
-				transmit_delay <= transmit_delay + 1;
-			ELSIF(transmit_delay < TRANSMIT_DELAY_MAX) THEN
-				IF(i_pixel_read = '1') THEN
-					o_valid_pixel <= '0';
-					transmit_delay <= 0;
-					send_count <= send_count + 1;
-				ELSE
+			IF(i_pixel_read = '1') THEN
+				o_pixel_data <= o_pixel_data;
+				o_valid_pixel <= '0';
+				transmit_delay <= 0;
+				send_count <= send_count + 1;
+			ELSE
+				IF(transmit_delay = 0) THEN
+					o_pixel_data <= sram_wire;
+					transmit_delay <= transmit_delay + 1;
+				ELSIF(transmit_delay = 1) THEN
+					o_pixel_data <= o_pixel_data;
 					o_valid_pixel <= '1';
 					transmit_delay <= transmit_delay + 1;
-					send_count <= send_count;
+				ELSE
+					o_pixel_data <= o_pixel_data;
+					o_valid_pixel <= '1';
+					transmit_delay <= transmit_delay;
 				END IF;
-			ELSE
-				
+				send_count <= send_count;
 			END IF;
 		ELSE
 			o_valid_frame <= '0';
@@ -294,7 +301,7 @@ END PROCESS;
 
 timeout : PROCESS(i_clk, i_pixel_read)
 BEGIN
-	IF(RISING_EDGE(i_clk) THEN
+	IF(RISING_EDGE(i_clk)) THEN
 		IF(i_pixel_read = '1') THEN
 			IF(timeout_count < TRANSMIT_DELAY_MAX) THEN
 				timeout_count <= timeout_count + 1;
@@ -302,8 +309,9 @@ BEGIN
 				timeout_count <= timeout_count;
 			END IF;
 		ELSE
-			timeout_cnt <= 0;
+			timeout_count <= 0;
 		END IF;
+	END IF;
 END PROCESS;
 
 selectSram_wire <= STD_LOGIC_VECTOR(TO_UNSIGNED(send_count, selectSram_wire'LENGTH));
