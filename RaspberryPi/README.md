@@ -8,11 +8,10 @@ sudo apt-get install python3-pip libatlas-base-dev libqtgui4 libqt4-test python3
 pip3 install tqdm opencv-python tensorflow matplotlib
 ```
 
-All of which are installable through the pip console using the names described above.
-
 ## Deployment
-Adam halp pls
+Once the packages are installed, run the CreateModel.py script to create a CNN model from the images provided in the ImageData folder.
 
 ## Authors
 * Colton Agathen
 * Adam Haarth
+* Connor Kroll
