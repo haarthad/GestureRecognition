@@ -39,8 +39,8 @@ PORT(
 	--i_finished       : IN STD_LOGIC;
 	i_pixel_read       : IN STD_LOGIC;
 	o_pixel_data       : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
-	o_valid_frame      : OUT STD_LOGIC;
-	o_valid_pixel      : OUT STD_LOGIC
+	o_valid_frame      : OUT STD_LOGIC := '0';
+	o_valid_pixel      : OUT STD_LOGIC := '0'
 );
 END CameraCollectorTransmitter;
 
@@ -113,6 +113,7 @@ SIGNAL send_count        : INTEGER := 0;
 SIGNAL transmit_delay    : INTEGER := 0;
 SIGNAL selectSram_wire   : STD_LOGIC_VECTOR(GREYSCALE_REG_NUM_BIN-1 DOWNTO 0); --\/
 SIGNAL sram_wire         : STD_LOGIC_VECTOR(GREYSCALE_PIXEL_WIDTH - 1 DOWNTO 0); --\/
+SIGNAL timeoutCount      : INTEGER := 0; --\/
 
 BEGIN
 --========================================
@@ -258,7 +259,6 @@ BEGIN
 	END IF;
 END PROCESS;
 
--------****WORKING HERE****-------
 --transmit greyscale pixels if in AWAIT_FINISH state
 transmit : PROCESS(i_clk, i_finished)
 BEGIN
@@ -270,11 +270,9 @@ BEGIN
 			IF(transmit_delay = 0) THEN
 				o_pixel_data <= sram_wire;
 				transmit_delay <= transmit_delay + 1;
-
 			ELSIF(transmit_delay = 1) THEN
 				o_valid_pixel <= '1';
 				transmit_delay <= transmit_delay + 1;
-			
 			ELSIF(transmit_delay < TRANSMIT_DELAY_MAX) THEN
 				IF(i_pixel_read = '1') THEN
 					o_valid_pixel <= '0';
@@ -294,10 +292,24 @@ BEGIN
 	END IF;
 END PROCESS;
 
+timeout : PROCESS(i_clk, i_pixel_read)
+BEGIN
+	IF(RISING_EDGE(i_clk) THEN
+		IF(i_pixel_read = '1') THEN
+			IF(timeout_count < TRANSMIT_DELAY_MAX) THEN
+				timeout_count <= timeout_count + 1;
+			ELSE
+				timeout_count <= timeout_count;
+			END IF;
+		ELSE
+			timeout_cnt <= 0;
+		END IF;
+END PROCESS;
+
 selectSram_wire <= STD_LOGIC_VECTOR(TO_UNSIGNED(send_count, selectSram_wire'LENGTH));
 
 i_finished <= '1' WHEN send_count = (TRANSMIT_NUMBER - 1) ELSE
-				  '1' WHEN transmit_delay = TRANSMIT_DELAY_MAX ELSE
+				  '1' WHEN timeout_count = TRANSMIT_DELAY_MAX ELSE
 	           '0';
 
 
