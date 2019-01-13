@@ -20,7 +20,6 @@ ARCHITECTURE behavioral OF tb_CameraCollectorTransmitter IS
 COMPONENT CameraCollectorTransmitter IS
 PORT(
 	i_clk              : IN STD_LOGIC;
-	i_pixclk				 : IN STD_LOGIC;
 	i_en               : IN STD_LOGIC;
 	i_pixel_data       : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
 	i_lval             : IN STD_LOGIC;
@@ -41,12 +40,18 @@ CONSTANT T_clk : TIME:= 20 ns; -- 50MHz clock period
 	SIGNAL i_clk              : STD_LOGIC;
 	SIGNAL i_en               : STD_LOGIC;
 	SIGNAL i_pixel_data       : STD_LOGIC_VECTOR(11 DOWNTO 0);
-	SIGNAL i_lval             : STD_LOGIC;
+	SIGNAL i_lval             : STD_LOGIC := '0';
 	SIGNAL i_fval             : STD_LOGIC;
 	SIGNAL i_pixel_read       : STD_LOGIC;
 	SIGNAL o_pixel_data       : STD_LOGIC_VECTOR(7 DOWNTO 0);
 	SIGNAL o_valid_frame      : STD_LOGIC;
 	SIGNAL o_valid_pixel      : STD_LOGIC;
+	SIGNAL pixel_gen_switch   : STD_LOGIC := '0';
+	SIGNAL pixel_gen          : STD_LOGIC_VECTOR(11 DOWNTO 0) := "000000000000"; 
+	SIGNAL lval_gen           : INTEGER := 0;
+	SIGNAL total_sent         : INTEGER := 0;
+	SIGNAL read_gen_switch    : STD_LOGIC;
+	SIGNAL read_gen_delay     : INTEGER := 0;
 BEGIN
 
 --generate the clock signal
@@ -82,15 +87,58 @@ PORT MAP(
 --55 to 70 cycles test i_fval going high changes state from await_frame to collect
 i_en <= '0','1' AFTER 20*T_clk;
 --i_pixel_data <= "000000000000";
-i_lval <= '0';
-i_fval <= '0', '1' AFTER 55*T_clk;
-i_pixel_read <= '0', '1' AFTER 25*T_clk, '0' AFTER 50*T_clk;
+--i_lval <= '0';
+i_fval <= '0', '1' AFTER 55*T_clk, '0' AFTER 314305*T_clk;
+read_gen_switch <= '0', '1' AFTER 314310*T_clk;
+--i_pixel_read <= '0', '1' AFTER 25*T_clk, '0' AFTER 50*T_clk;
+pixel_gen_switch <= '0', '1' AFTER 75*T_clk;
 
 --generate pixel data from camera
-pixel_gen: PROCESS
+pixel_generation: PROCESS(i_clk)
 BEGIN
-	
+	IF(RISING_EDGE(i_clk)) THEN
+		IF(pixel_gen_switch = '1') THEN
+			IF(lval_gen > 489) THEN
+				lval_gen <= 0;
+				i_lval <= '0';
+			ELSIF(lval_gen < 480) THEN
+				lval_gen <= lval_gen +1;
+				i_lval <= '1';
+				total_sent <= total_sent + 1;
+			ELSE
+				lval_gen <= lval_gen +1;
+				i_lval <= '0';
+			END IF;
+			
+			IF(pixel_gen = "111111111111") THEN
+				pixel_gen <= "000000000000"; 
+			ELSE
+				pixel_gen <= STD_LOGIC_VECTOR(UNSIGNED(pixel_gen)+1);
+			END IF;
+		END IF;
+	END IF;
+END PROCESS;
 
+--generate i_pixel_read signal
+read_generation: PROCESS(i_clk)
+BEGIN
+	IF(read_gen_switch = '1') THEN
+		IF(read_gen_delay = 0) THEN
+			i_pixel_read <= '0';
+			read_gen_delay <= read_gen_delay + 1;
+		ELSIF(read_gen_delay = 1) THEN
+			i_pixel_read <= '1';
+			read_gen_delay <= read_gen_delay + 1;
+		ELSE
+			i_pixel_read <= '0';
+			read_gen_delay <= 0;
+		END IF;
+	ELSE
+		i_pixel_read <= '0';
+	END IF;
+END PROCESS;
+
+i_pixel_data <= pixel_gen;
 
 END behavioral;	
 

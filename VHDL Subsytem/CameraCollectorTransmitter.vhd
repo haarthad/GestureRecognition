@@ -10,7 +10,7 @@
 --Start Date: 12/2/2018
 
 --INPUTS:
---i_clk        : input clock (50 MHz)
+--i_clk        : input clock (50 MHz) from camera pclk
 --i_pixclk     : clock from camera for latching pixel data
 --i_en         : enable collection of pixel data from the camera
 --i_pixel_data : the pixel information output by the D5M at each epoch
@@ -33,7 +33,6 @@ USE work.CAMERA_PACK.all;
 ENTITY CameraCollectorTransmitter IS
 PORT(
 	i_clk              : IN STD_LOGIC;
-	i_pixclk				 : IN STD_LOGIC;
 	i_en               : IN STD_LOGIC;
 	i_pixel_data       : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
 	i_lval             : IN STD_LOGIC;
@@ -232,7 +231,7 @@ BEGIN
 				write_en_wire <= '1';
 				pixelCount    <= pixelCount + 1;
 				--increment the write address of the front/back buffer
-				IF(UNSIGNED(write_select_wire) < ((PICTURE_WIDTH * 4) - 1)) THEN
+				IF(UNSIGNED(write_select_wire) < ((PICTURE_WIDTH * 4) - 1)) THEN -- was IF(UNSIGNED(write_select_wire) < ((PICTURE_WIDTH * 4) - 1)) THEN
 					write_select_wire <= STD_LOGIC_VECTOR(UNSIGNED(write_select_wire) + 1 );
 					IF(UNSIGNED(write_select_wire) = ((PICTURE_WIDTH * 2) - 1)) THEN
 						i_swapped_wire <= '1';

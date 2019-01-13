@@ -18,9 +18,9 @@ package CAMERA_PACK is
 	--the width of a greyscale pixel
 	CONSTANT GREYSCALE_PIXEL_WIDTH : INTEGER := 8;
 	--greysccaled camera frame is 160x120
-	CONSTANT GREYSCALE_PICTURE_WIDTH : INTEGER := 160; 
+	CONSTANT GREYSCALE_PICTURE_WIDTH : INTEGER := 320; 
 	--greysccaled camera frame is 160x120
-	CONSTANT GREYSCALE_PICTURE_HEIGHT : INTEGER := 120;
+	CONSTANT GREYSCALE_PICTURE_HEIGHT : INTEGER := 240;
 	--number of bits required to store 160x120 as a binary number
 	CONSTANT GREYSCALE_REG_NUM_BIN : INTEGER := 15;
 	--how many FPGA clock cycles pixel_read must be held to force i_finished
