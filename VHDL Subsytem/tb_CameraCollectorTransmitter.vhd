@@ -123,10 +123,10 @@ END PROCESS;
 read_generation: PROCESS(i_clk)
 BEGIN
 	IF(read_gen_switch = '1') THEN
-		IF(read_gen_delay = 0) THEN
+		IF(read_gen_delay < 4) THEN
 			i_pixel_read <= '0';
 			read_gen_delay <= read_gen_delay + 1;
-		ELSIF(read_gen_delay = 1) THEN
+		ELSIF(read_gen_delay = 4) THEN
 			i_pixel_read <= '1';
 			read_gen_delay <= read_gen_delay + 1;
 		ELSE

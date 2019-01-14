@@ -224,7 +224,9 @@ BEGIN
 	IF(i_finished = '1') THEN
 		pixelCount   <= 0;
 		rowCount     <= 0;
+		write_en_wire <= '0';
 		write_select_wire <= (OTHERS => '0');
+		i_swapped_wire <= '0';
 	ELSIF(RISING_EDGE(i_clk)) THEN
 		IF(pstate = COLLECT) THEN
 			IF(i_lval = '1') THEN
@@ -235,12 +237,14 @@ BEGIN
 					write_select_wire <= STD_LOGIC_VECTOR(UNSIGNED(write_select_wire) + 1 );
 					IF(UNSIGNED(write_select_wire) = ((PICTURE_WIDTH * 2) - 1)) THEN
 						i_swapped_wire <= '1';
-					ELSIF(UNSIGNED(write_select_wire) = ((PICTURE_WIDTH * 4) - 1)) THEN
-						i_swapped_wire <= '1';
 					ELSE
 						i_swapped_wire <= '0';
 					END IF;
-				ELSE
+				ELSIF(UNSIGNED(write_select_wire) = ((PICTURE_WIDTH * 4) - 1)) THEN
+					i_swapped_wire <= '1';
+					write_select_wire <= (OTHERS => '0');
+				ELSE 
+					i_swapped_wire <= '0';
 					write_select_wire <= (OTHERS => '0');
 				END IF;
 			ELSE
@@ -256,6 +260,12 @@ BEGIN
 					rowCount <= 0;
 				END IF;
 			END IF;
+		ELSE
+			rowCount <= 0;
+			pixelCount <= 0;
+			write_en_wire <= '0';
+			write_select_wire <= (OTHERS => '0');
+			i_Swapped_wire <= '0';
 		END IF;
 	END IF;
 END PROCESS;
@@ -315,9 +325,18 @@ END PROCESS;
 
 selectSram_wire <= STD_LOGIC_VECTOR(TO_UNSIGNED(send_count, selectSram_wire'LENGTH));
 
-i_finished <= '1' WHEN send_count = (TRANSMIT_NUMBER - 1) ELSE
-				  '1' WHEN timeout_count = TRANSMIT_DELAY_MAX ELSE
-	           '0';
+PROCESS(i_clk)
+BEGIN
+	IF(RISING_EDGE(i_clk)) THEN
+		IF(send_count = TRANSMIT_NUMBER - 1) THEN
+			i_finished <= '1';
+		ELSIF(timeout_count = TRANSMIT_DELAY_MAX) THEN
+			i_finished <= '1';
+		ELSE
+			i_finished <= '0';
+		END IF;
+	END IF;
+END PROCESS;
 
 
 --i_lval falling edge detection. lval_edge strobes high one clock period when
