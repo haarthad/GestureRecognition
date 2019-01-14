@@ -74,6 +74,7 @@ SIGNAL regD           : INTEGER := 641;
 SIGNAL sramIndex      : INTEGER := 0;
 SIGNAL greyscalePixel : STD_LOGIC_VECTOR(GREYSCALE_PIXEL_WIDTH - 1 DOWNTO 0);
 SIGNAL rowDone        : STD_LOGIC := '0';
+SIGNAL greyscaleTemp : STD_LOGIC_VECTOR(11 DOWNTO 0);
 --========================================
 -- Local Architecture
 --========================================
@@ -155,7 +156,7 @@ BEGIN
 		IF(pstate = DRAIN_FRONT) THEN
 			--grab four Bayer pattern pixels and convert them to a single greyscale pixel
 			--it looks nasty, but there are just a lot of type conversions
-			greyscalePixel <= STD_LOGIC_VECTOR(TO_UNSIGNED((((TO_INTEGER(UNSIGNED(i_regA)) + TO_INTEGER(UNSIGNED(i_regD)))/2)+TO_INTEGER(UNSIGNED(i_regB))+TO_INTEGER(UNSIGNED(i_regC)))/3,greyscalePixel'LENGTH));
+			greyscaleTemp <= STD_LOGIC_VECTOR(UNSIGNED((((UNSIGNED(i_regA) + UNSIGNED(i_regD))/2)+UNSIGNED(i_regB)+UNSIGNED(i_regC))/3));
 			IF(sramIndex < (TRANSMIT_NUMBER - 1)) THEN
 				sramIndex <= sramIndex + 1;
 			ELSE
@@ -179,7 +180,7 @@ BEGIN
 		ELSIF(pstate = DRAIN_BACK) THEN
 			--grab four Bayer pattern pixels and convert them to a single greyscale pixel
 			--it looks nasty, but there are just a lot of type conversions
-			greyscalePixel <= STD_LOGIC_VECTOR(TO_UNSIGNED((((TO_INTEGER(UNSIGNED(i_regA)) + TO_INTEGER(UNSIGNED(i_regD)))/2)+TO_INTEGER(UNSIGNED(i_regB))+TO_INTEGER(UNSIGNED(i_regC)))/3,greyscalePixel'LENGTH));
+			greyscaleTemp <= STD_LOGIC_VECTOR(UNSIGNED((((UNSIGNED(i_regA) + UNSIGNED(i_regD))/2)+UNSIGNED(i_regB)+UNSIGNED(i_regC))/3));
 			IF(sramIndex < (TRANSMIT_NUMBER - 1)) THEN
 				sramIndex <= sramIndex + 1;
 			ELSE sramIndex <= sramIndex;
@@ -204,6 +205,8 @@ BEGIN
 		o_sram <=  regFile(TO_INTEGER(UNSIGNED(i_selectSram)));
 	END IF;
 END PROCESS;
+
+greyscalePixel <= greyscaleTemp(11 DOWNTO 4);
 
 o_selectA <= STD_LOGIC_VECTOR(TO_UNSIGNED(regA, o_selectA'LENGTH));
 o_selectB <= STD_LOGIC_VECTOR(TO_UNSIGNED(regB, o_selectB'LENGTH));
