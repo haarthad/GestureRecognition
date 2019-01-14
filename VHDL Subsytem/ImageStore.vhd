@@ -156,7 +156,11 @@ BEGIN
 			--grab four Bayer pattern pixels and convert them to a single greyscale pixel
 			--it looks nasty, but there are just a lot of type conversions
 			greyscalePixel <= STD_LOGIC_VECTOR(TO_UNSIGNED((((TO_INTEGER(UNSIGNED(i_regA)) + TO_INTEGER(UNSIGNED(i_regD)))/2)+TO_INTEGER(UNSIGNED(i_regB))+TO_INTEGER(UNSIGNED(i_regC)))/3,greyscalePixel'LENGTH));
-			sramIndex <= sramIndex + 1;
+			IF(sramIndex < (TRANSMIT_NUMBER - 1)) THEN
+				sramIndex <= sramIndex + 1;
+			ELSE
+				sramIndex <= sramIndex;
+			END IF;
 			IF(regB < 639) THEN 
 				regA <= regA + 2;
 				regB <= regB + 2;
@@ -176,7 +180,10 @@ BEGIN
 			--grab four Bayer pattern pixels and convert them to a single greyscale pixel
 			--it looks nasty, but there are just a lot of type conversions
 			greyscalePixel <= STD_LOGIC_VECTOR(TO_UNSIGNED((((TO_INTEGER(UNSIGNED(i_regA)) + TO_INTEGER(UNSIGNED(i_regD)))/2)+TO_INTEGER(UNSIGNED(i_regB))+TO_INTEGER(UNSIGNED(i_regC)))/3,greyscalePixel'LENGTH));
-			sramIndex <= sramIndex + 1;
+			IF(sramIndex < (TRANSMIT_NUMBER - 1)) THEN
+				sramIndex <= sramIndex + 1;
+			ELSE sramIndex <= sramIndex;
+			END IF;
 			IF(regB < 1919) THEN 
 				regA <= regA + 2;
 				regB <= regB + 2;
