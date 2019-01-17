@@ -14,10 +14,11 @@ from PIL import Image
 TRAINING_DATA  = 'ImageData/Train'
 TESTING_DATA   = 'ImageData/Test'
 EXTRA_TESTING_DATA = 'ImageData/ExtraTest'
-GESTURE_NAMES = ['A','B','C','G','V']
+GESTURE_NAMES = ['A','B','C','V']
 X_OF_IMAGES = 64
 Y_OF_IMAGES = 64
-NUMBER_OF_EPOCHS = 10
+NUMBER_OF_EPOCHS = 20
+NUMBER_OF_GESTURES = 4
 
 ###############################################################################
 # Methods
@@ -31,19 +32,17 @@ filename.
 def selectLabel(image):
 	# Get beginning of filename. This defines each gesture is shown in the
 	# image.
-	gesture = image.split('-')[0]
-	label = np.array([0,0,0,0,0])
+	gesture = image[0]
+	label = np.array([0,0,0,0])
 
 	if gesture == 'A':
-		label = np.array([1,0,0,0,0])
+		label = np.array([1,0,0,0])
 	elif gesture == 'B':
-		label = np.array([0,1,0,0,0])
+		label = np.array([0,1,0,0])
 	elif gesture == 'C':
-		label = np.array([0,0,1,0,0])
-	elif gesture == 'Point' or 'G':
-		label = np.array([0,0,0,1,0])
+		label = np.array([0,0,1,0])
 	elif gesture == 'V':
-		label = np.array([0,0,0,0,1])
+		label = np.array([0, 0, 0,1])
 	return label
 
 """
@@ -57,10 +56,10 @@ def loadTrainingData():
 		path = os.path.join(TRAINING_DATA, i)
 		image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 		image = cv2.resize(image, (X_OF_IMAGES, Y_OF_IMAGES))
-		noise = image + np.random.normal(0.0,10.0, image.shape)
+		#noise = image + np.random.normal(0.0,10.0, image.shape)
 		label = selectLabel(i)
 		train_images.append([np.array(image), label])
-		train_images.append([np.array(noise), label])
+		#train_images.append([np.array(noise), label])
 	shuffle(train_images)
 	return train_images
 
@@ -91,7 +90,7 @@ def loadPersonalTestingData():
 		image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 		image = cv2.resize(image, (X_OF_IMAGES, Y_OF_IMAGES))
 		personal_test_images.append([np.array(image), selectLabel(i)])
-	shuffle(personal_test_images)
+	#shuffle(personal_test_images)
 	return personal_test_images
 
 """
@@ -134,7 +133,7 @@ def plot_value_array(i, predictions_array, true_label):
 	plt.grid(False)
 	plt.xticks([])
 	plt.yticks([])
-	thisplot = plt.bar(range(5), predictions_array, color="#777777")
+	thisplot = plt.bar(range(NUMBER_OF_GESTURES), predictions_array, color="#777777")
 	plt.ylim([0, 1])
 	predicted_label = np.argmax(predictions_array)
  
@@ -150,7 +149,7 @@ training_image_list = loadTrainingData()
 testing_image_list = loadTestingData()
 personal_testing_image_list = loadPersonalTestingData()
 
-training_image_list += testing_image_list[0:500]
+#training_image_list += testing_image_list[0:500]
 
 # Reshape images to be passed through the convolution layers
 training_images = np.array([i[0] for i in training_image_list])\
@@ -199,9 +198,9 @@ model = keras.Sequential([
 						   padding='same'),
 	keras.layers.Dropout(0.25),
 	keras.layers.Flatten(),
-	keras.layers.Dense(512, activation=tf.nn.relu),
+	keras.layers.Dense(128, activation=tf.nn.relu),
 	keras.layers.Dropout(0.5),
-	keras.layers.Dense(5, activation=tf.nn.softmax),
+	keras.layers.Dense(NUMBER_OF_GESTURES, activation=tf.nn.softmax),
 ])
 
 # Compile model with the following parameters
@@ -213,7 +212,7 @@ model.compile(optimizer=tf.train.AdamOptimizer(),
 model.fit(training_images,
 		  training_labels,
 		  epochs=NUMBER_OF_EPOCHS,
-		  batch_size=32)
+		  batch_size=50)
 
 # Calculate and print accuracy for training, test, and personal test images
 training_loss, training_accuracy = model.evaluate(training_images,
@@ -231,8 +230,8 @@ predictions = model.predict(personal_testing_images)
 
 # Print the first 25 test images, and their predicted values for each category
 # Uncomment plt.show to see the plot
-num_rows = 4
-num_cols = 2
+num_rows = 7
+num_cols = 3
 num_images = num_rows*num_cols
 plt.figure(figsize=(2*2*num_cols, 2*num_rows))
 for i in range(num_images):
