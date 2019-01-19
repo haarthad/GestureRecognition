@@ -56,10 +56,10 @@ def loadTrainingData():
 		path = os.path.join(TRAINING_DATA, i)
 		image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 		image = cv2.resize(image, (X_OF_IMAGES, Y_OF_IMAGES))
-		#noise = image + np.random.normal(0.0,10.0, image.shape)
+		noise = image + np.random.normal(0.0,10.0, image.shape)
 		label = selectLabel(i)
 		train_images.append([np.array(image), label])
-		#train_images.append([np.array(noise), label])
+		train_images.append([np.array(noise), label])
 	shuffle(train_images)
 	return train_images
 
@@ -230,8 +230,8 @@ predictions = model.predict(personal_testing_images)
 
 # Print the first 25 test images, and their predicted values for each category
 # Uncomment plt.show to see the plot
-num_rows = 7
-num_cols = 3
+num_rows = 5
+num_cols = 5
 num_images = num_rows*num_cols
 plt.figure(figsize=(2*2*num_cols, 2*num_rows))
 for i in range(num_images):
