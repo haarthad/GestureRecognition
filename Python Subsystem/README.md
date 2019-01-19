@@ -5,7 +5,7 @@ This folder contains the Python GPIO/Tensorflow image reception and recognition 
 Run the code provided below to install the required packages to run the scripts in this folder:
 ```
 sudo apt-get install python3-pip libatlas-base-dev libqtgui4 libqt4-test python3-pyqt5 
-pip3 install tqdm opencv-python tensorflow matplotlib
+pip3 install tqdm opencv-python tensorflow matplotlib scipy
 ```
 
 ## Deployment
