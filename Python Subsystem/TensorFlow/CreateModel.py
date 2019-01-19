@@ -6,6 +6,7 @@ from tqdm import tqdm
 import tensorflow as tf
 from tensorflow import keras
 import matplotlib.pyplot as plt
+import scipy.ndimage as nd
 from PIL import Image
 
 ###############################################################################
@@ -17,7 +18,7 @@ EXTRA_TESTING_DATA = 'ImageData/ExtraTest'
 GESTURE_NAMES = ['A','B','C','V']
 X_OF_IMAGES = 64
 Y_OF_IMAGES = 64
-NUMBER_OF_EPOCHS = 20
+NUMBER_OF_EPOCHS = 30
 NUMBER_OF_GESTURES = 4
 
 ###############################################################################
@@ -57,9 +58,25 @@ def loadTrainingData():
 		image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 		image = cv2.resize(image, (X_OF_IMAGES, Y_OF_IMAGES))
 		noise = image + np.random.normal(0.0,10.0, image.shape)
+
+		#Force image to use int32
+		image = image.astype('int32')
+		#Apply sobel filter in x and y direction
+		dx = nd.sobel(image, 1)
+		dy = nd.sobel(image, 0)
+		#Combine the two directions into one image
+		mag = np.hypot(dx, dy)
+		mag *= 255.0 / np.max(mag)
+		#Repeat for noisy image
+		dxn = nd.sobel(noise, 1)
+		dyn = nd.sobel(noise, 0)
+		magn = np.hypot(dxn, dyn)
+		magn *= 255.0 / np.max(magn)
+		#Load images into the array for training
+
 		label = selectLabel(i)
-		train_images.append([np.array(image), label])
-		train_images.append([np.array(noise), label])
+		train_images.append([np.array(mag), label])
+		train_images.append([np.array(magn), label])
 	shuffle(train_images)
 	return train_images
 
@@ -74,7 +91,14 @@ def loadTestingData():
 		path = os.path.join(TESTING_DATA, i)
 		image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 		image = cv2.resize(image, (X_OF_IMAGES, Y_OF_IMAGES))
-		test_images.append([np.array(image), selectLabel(i)])
+
+		image = image.astype('int32')
+		dx = nd.sobel(image, 1)
+		dy = nd.sobel(image, 0)
+		mag = np.hypot(dx, dy)
+		mag *= 255.0 / np.max(mag)
+
+		test_images.append([np.array(mag), selectLabel(i)])
 	shuffle(test_images)
 	return test_images
 
@@ -89,7 +113,14 @@ def loadPersonalTestingData():
 		path = os.path.join(EXTRA_TESTING_DATA, i)
 		image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 		image = cv2.resize(image, (X_OF_IMAGES, Y_OF_IMAGES))
-		personal_test_images.append([np.array(image), selectLabel(i)])
+
+		image = image.astype('int32')
+		dx = nd.sobel(image, 1)
+		dy = nd.sobel(image, 0)
+		mag = np.hypot(dx, dy)
+		mag *= 255.0 / np.max(mag)
+
+		personal_test_images.append([np.array(mag), selectLabel(i)])
 	#shuffle(personal_test_images)
 	return personal_test_images
 
