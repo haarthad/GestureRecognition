@@ -72,11 +72,29 @@ def loadTrainingData():
 		dyn = nd.sobel(noise, 0)
 		magn = np.hypot(dxn, dyn)
 		magn *= 255.0 / np.max(magn)
-		#Load images into the array for training
 
+		# Apply 30/-30 degree rotation to both images
+		rows, cols = mag.shape
+		M = cv2.getRotationMatrix2D((cols / 2, rows / 2), 30, 1)
+		rst = cv2.warpAffine(mag, M, (cols, rows))
+		rowsn, colsn = magn.shape
+		M = cv2.getRotationMatrix2D((colsn / 2, rowsn / 2), 30, 1)
+		rstn = cv2.warpAffine(magn, M, (colsn, rowsn))
+		rows, cols = mag.shape
+		M = cv2.getRotationMatrix2D((cols / 2, rows / 2), -30, 1)
+		orst = cv2.warpAffine(mag, M, (cols, rows))
+		rowsn, colsn = magn.shape
+		M = cv2.getRotationMatrix2D((colsn / 2, rowsn / 2), -30, 1)
+		orstn = cv2.warpAffine(magn, M, (colsn, rowsn))
+
+		# Load images into the array for training
 		label = selectLabel(i)
 		train_images.append([np.array(mag), label])
 		train_images.append([np.array(magn), label])
+		train_images.append([np.array(rst), label])
+		train_images.append([np.array(rstn), label])
+		train_images.append([np.array(orst), label])
+		train_images.append([np.array(orstn), label])
 	shuffle(train_images)
 	return train_images
 
