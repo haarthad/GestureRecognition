@@ -1,5 +1,5 @@
 # import the gpio library for the pi, print error if it can't.
-import gpio_management as gm
+from GPIO import gpio_management as gm
 import numpy as np
 import scipy.misc as smp
 from multiprocessing import Queue
@@ -18,11 +18,11 @@ def inputConversion(channel):
 
 
 # Main function that pulls the pixel values and stores them into a list.
-def pixelEnqueue(pixelQueue):
+def pixelEnqueue(pixelQueue, errorQueue):
     # Initialize the list with the right amount of pixel data.
     # In the future this will be modified to be a list of lists.
     # The overall list will be the number of pixels, and then each sublist is 8 large.
-    pixelList = np.zeros(640, 480, 3)
+    pixelList = np.zeros([640, 480, 3])
 
     # Initialize the GPIOS.
     gm.pixelReceptionInit()

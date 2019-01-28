@@ -8,15 +8,15 @@ This particular library contains individual commands to complete objectives incl
 
 ### Getting Started
 You will need the following libraries in order to run these scripts: 
-* [googleapiclient](https://developers.google.com/api-client-library/python/start/installatio)
+* [googleapiclient](https://developers.google.com/api-client-library/python/start/installation)
 * oauth2client - direct install through pip
 * pygame - direct install through pip
 
 Additionally, you will need to place your own credentials JSON in the root directory:
-[Google API Walthrough](https://developers.google.com/calendar/quickstart/python)
+[Google API Walkthrough](https://developers.google.com/calendar/quickstart/python)
 
 ### Deployment
-Literally just run it through the console.
+Run it through the console.
 
 ### Authors
 * Connor Kroll
