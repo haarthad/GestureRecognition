@@ -23,6 +23,8 @@ def Timer():
     sound.play()
     time.sleep(3)
 
-
+def main():
+	Timer()
+	
 if __name__ == "__main__":
-    Timer()
+    main()

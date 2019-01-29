@@ -9,5 +9,8 @@ def displayClock():
             time.sleep(1)
 
 
+def main():
+	displayClock()
+			
 if __name__ == "__main__":
-    displayClock()
+    main()

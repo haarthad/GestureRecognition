@@ -19,5 +19,8 @@ def getWeatherString():
     condition = lookup.condition
     print(condition.text + ',' + condition.temp + "F")
 
+def main():
+	getWeatherString()
+	
 if __name__ == "__main__":
-    getWeatherString()
+    main()

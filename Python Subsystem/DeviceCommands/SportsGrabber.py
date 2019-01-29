@@ -113,9 +113,9 @@ def printScore(game):
     away_score = game.find('./AWAY/SCORE').text
     game_status = game.find('./STATUS').text
     print("%s: %s, %s: %s. %s" % (away_team, away_score, home_team, home_score, game_status))
-
-
-if args.t:
-    showBoxScore(args.d if args.d else yyyymmdd, args.l, args.t)
-else:
-    showScores(args.l.split(",") if args.l else ['NFL', 'MLB', 'NHL', 'NBA', 'NCF'])
+	
+def main():
+	showScores(['NFL', 'MLB', 'NHL', 'NBA', 'NCF'])	
+	
+if __name__=="__main__":
+	showScores(['NFL', 'MLB', 'NHL', 'NBA', 'NCF'])
