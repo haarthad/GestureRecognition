@@ -1,7 +1,7 @@
 from tensorflow import keras
 import numpy as np
 from queue import Empty
-from DeviceCommands import CalendarGrabber, TimeGrabber, Timer, WeatherGrabber
+from DeviceCommands import CalendarGrabber, TimeGrabber, SportsGrabber, Timer, WeatherGrabber
 
 ###############################################################################
 # Methods
@@ -60,23 +60,23 @@ def processImage(pixel_queue, error_queue, model):
     # See what the model predicts with the highest percentage
     predicted_gesture = np.argmax(prediction[0])
 
-    #TODO Call correct command for the predicted gesture
+    # Call correct command for the predicted gesture
     if predicted_gesture == 0:
         print("IR - Gesture A")
-        Timer.Timer()
+        Timer.main()
     elif predicted_gesture == 1:
         print("IR - Gesture B")
-        TimeGrabber.displayClock()
+        TimeGrabber.main()
     elif predicted_gesture == 2:
         print("IR - Gesture C")
         CalendarGrabber.main()
     elif predicted_gesture == 3:
         print("IR - Gesture G")
-        #SportsGrabber
+        SportsGrabber.main()
     elif predicted_gesture == 4:
         print("IR - Gesture V")
     elif predicted_gesture == 5:
-        WeatherGrabber.getWeatherString()
+        WeatherGrabber.main()
         print("IR - Gesture Nothing")
     else:
         print("ERROR - IR - Invalid Gesture")

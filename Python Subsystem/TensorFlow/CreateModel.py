@@ -14,11 +14,11 @@ import scipy.ndimage as nd
 TRAINING_DATA =      'ImageData/Train'
 TESTING_DATA =       'ImageData/Test'
 EXTRA_TESTING_DATA = 'ImageData/ExtraTest'
-GESTURE_NAMES =      ['A', 'B', 'C', 'V']
+GESTURE_NAMES =      ['A', 'B', 'C', 'G', 'V', 'Nothing']
 X_OF_IMAGES =        64
 Y_OF_IMAGES =        64
 NUMBER_OF_EPOCHS =   30
-NUMBER_OF_GESTURES = 4
+NUMBER_OF_GESTURES = 6
 BATCH_SIZE =         50
 
 ###############################################################################
@@ -34,16 +34,20 @@ def selectLabel(image):
     # Get beginning of filename. This defines each gesture is shown in the
     # image.
     gesture = image[0]
-    label = np.array([0, 0, 0, 0])
+    label = np.array([0, 0, 0, 0, 0, 0])
 
     if gesture == 'A':
-        label = np.array([1, 0, 0, 0])
+        label = np.array([1, 0, 0, 0, 0, 0])
     elif gesture == 'B':
-        label = np.array([0, 1, 0, 0])
+        label = np.array([0, 1, 0, 0, 0, 0])
     elif gesture == 'C':
-        label = np.array([0, 0, 1, 0])
+        label = np.array([0, 0, 1, 0, 0, 0])
+    elif gesture == 'G':
+        label = np.array([0, 0, 0, 1, 0, 0])
     elif gesture == 'V':
-        label = np.array([0, 0, 0, 1])
+        label = np.array([0, 0, 0, 0, 1, 0])
+    elif gesture == 'N':
+        label = np.array([0, 0, 0, 0, 0, 1])
     return label
 
 """
@@ -267,8 +271,8 @@ def print_accuracy_graph(model, images, labels, image_list):
 
     # Print the first 25 images, and their predicted values for each category
     # Uncomment plt.show to see the plot
-    num_rows = 5
-    num_cols = 5
+    num_rows = 9
+    num_cols = 8
     num_images = num_rows*num_cols
     plt.figure(figsize=(2*2*num_cols, 2*num_rows))
     for i in range(num_images):
