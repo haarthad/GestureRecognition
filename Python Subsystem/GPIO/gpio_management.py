@@ -7,10 +7,10 @@ except RuntimeError:
 # Assign variables to GPIO numbers to avoid magic numbers
 # DOUBLE CHECK THESE PINOUT NUMBERS ARE CORRECT
 # Done on top level so that they can be easily called
-pixelInput1, pixelInput2, pixelInput3 = 8, 9, 7
-pixelInput4, pixelInput5, pixelInput6 = 0, 2, 3
-pixelInput7, pixelInput8, readyToSend = 12, 13, 14
-readyToReceive, startOfImage = 21, 22
+pixelInput1, pixelInput2, pixelInput3 = 8, 10, 12
+pixelInput4, pixelInput5, pixelInput6 = 16, 18, 22
+pixelInput7, pixelInput8, validFrame = 24, 26, 32
+readFinished, startOfImage, pixelStable = 36, 38, 40
 
 
 # Initialize all of the GPIO ports
@@ -19,10 +19,20 @@ def pixelReceptionInit():
     # This is nice because GPIO numbers don't change between pi board revisions
     GPIO.setmode(GPIO.BOARD)
     # Set the GPIOS to either inputs or outputs and set them all to pull down
-    channel_list = [pixelInput1, pixelInput2, pixelInput3, pixelInput4, pixelInput5,
-                    pixelInput6, pixelInput7, pixelInput8, readyToSend, startOfImage]
-    GPIO.setup(channel_list, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    GPIO.setup(readyToReceive, GPIO.OUT, pull_up_down=GPIO.PUD_DOWN)
+
+    GPIO.setup(pixelInput1, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(pixelInput2, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(pixelInput3, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(pixelInput4, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(pixelInput5, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(pixelInput6, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(pixelInput7, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(pixelInput8, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(startOfImage, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(validFrame, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(pixelStable, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+    GPIO.setup(readFinished, GPIO.OUT, initial=GPIO.LOW)
     # Add an event to detect the start of the image signal
     # Later on use GPIO.event_detected(channel) to check if an image has started
     GPIO.add_event_detect(startOfImage, GPIO.RISING)
