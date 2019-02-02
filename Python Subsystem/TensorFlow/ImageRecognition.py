@@ -1,4 +1,5 @@
 from tensorflow import keras
+import cv2
 import numpy as np
 from queue import Empty
 from DeviceCommands import CalendarGrabber, TimeGrabber, SportsGrabber, Timer, WeatherGrabber
@@ -12,10 +13,9 @@ Initializes the recognition part of the system and any variables, and loads
 the default model that was created earlier.
 :return Loaded model
 """
-def initRecognition():
+def initRecognition(model_path):
     # Load image recognition model
-    loaded_model = keras.models.load_model('TensorFlow/SavedModels/'
-                                           'image_recognition_model.h5')
+    loaded_model = keras.models.load_model(model_path)
     print("IR - Successfully loaded model")
     return loaded_model
 
@@ -54,6 +54,11 @@ def processImage(pixel_queue, error_queue, model):
         print("ERROR - IR - Invalid Image")
         return
 
+    # Reformat image data to work with the model
+    image = cv2.resize(image, (64, 64))
+    image = image.reshape(-1, 64, 64, 1)
+    image = image / 255.0
+
     # Run image through model and get a prediction
     prediction = model.predict(image)
 
@@ -75,8 +80,8 @@ def processImage(pixel_queue, error_queue, model):
         SportsGrabber.main()
     elif predicted_gesture == 4:
         print("IR - Gesture V")
-    elif predicted_gesture == 5:
         WeatherGrabber.main()
+    elif predicted_gesture == 5:
         print("IR - Gesture Nothing")
     else:
         print("ERROR - IR - Invalid Gesture")
@@ -86,9 +91,9 @@ def processImage(pixel_queue, error_queue, model):
 # Main logic
 ###############################################################################
 
-def runRecognition(pixel_queue, error_queue):
+def runRecognition(pixel_queue, error_queue, model_path):
     # Load default model
-    image_recognition_model = initRecognition()
+    image_recognition_model = initRecognition(model_path)
 
     # Constantly read in and process images
     while True:
