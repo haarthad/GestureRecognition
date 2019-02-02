@@ -10,7 +10,7 @@ pip3 install tqdm opencv-python tensorflow matplotlib scipy google-api-python-cl
 ```
 
 ## Deployment
-Once the packages are installed, run 'pi_main.py' to spawn the processes for GPIO, TensorFlow, and DeviceCommands. 
+Once the packages are installed, run 'pi_main.py' to spawn the processes for the main GPIO and TensorFlow scripts. 
 If you add custom images into the ImageData folder, run the 'CreateModel.py' script to create a new CNN 
 TensorFlow model from the images provided in the ImageData folder. The model used in 'ImageRecognition.py' 
 is located in the SavedModels folder as 'image_recognition_model.h5'.
