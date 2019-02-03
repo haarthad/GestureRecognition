@@ -24,7 +24,9 @@ package CAMERA_PACK is
 	--number of bits required to store 76800 (320*240) as a binary number
 	CONSTANT GREYSCALE_REG_NUM_BIN : INTEGER := 17;
 	--how many FPGA clock cycles pixel_read must be held to force i_finished
-	CONSTANT TRANSMIT_DELAY_MAX : INTEGER := 20;
+	CONSTANT TRANSMIT_DELAY_MAX : INTEGER := 500000000;
 	--how many pixels to send from SRAM during transmission
 	CONSTANT TRANSMIT_NUMBER : INTEGER :=  GREYSCALE_PICTURE_WIDTH * GREYSCALE_PICTURE_HEIGHT;
 end CAMERA_PACK;
+
+--78

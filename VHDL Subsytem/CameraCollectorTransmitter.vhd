@@ -37,11 +37,12 @@ PORT(
 	i_pixel_data       : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
 	i_lval             : IN STD_LOGIC;
 	i_fval             : IN STD_LOGIC;
-	--i_finished       : IN STD_LOGIC;
 	i_pixel_read       : IN STD_LOGIC;
 	o_pixel_data       : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
 	o_valid_frame      : OUT STD_LOGIC := '0';
-	o_valid_pixel      : OUT STD_LOGIC := '0'
+	o_valid_pixel      : OUT STD_LOGIC := '0';
+	o_sobel_en         : OUT STD_LOGIC := '0';
+	o_finished         : OUT STD_LOGIC
 );
 END CameraCollectorTransmitter;
 
@@ -114,7 +115,9 @@ SIGNAL send_count        : INTEGER := 0;
 SIGNAL transmit_delay    : INTEGER := 0;
 SIGNAL selectSram_wire   : STD_LOGIC_VECTOR(GREYSCALE_REG_NUM_BIN-1 DOWNTO 0); --\/
 SIGNAL sram_wire         : STD_LOGIC_VECTOR(GREYSCALE_PIXEL_WIDTH - 1 DOWNTO 0); --\/
-SIGNAL timeout_count      : INTEGER := 0; --\/
+SIGNAL timeout_count     : INTEGER := 0; --\/
+SIGNAL i_read_delayed    : STD_LOGIC := '0';
+SIGNAL i_read_edge       : STD_LOGIC := '0';
 
 BEGIN
 --========================================
@@ -206,8 +209,10 @@ BEGIN
       WHEN AWAIT_FINISH =>
          IF (i_finished = '1') THEN
             nstate <= RESTART;
+				o_sobel_en <= '0';
 			ELSE
 				nstate <= AWAIT_FINISH;
+				o_sobel_en <= '1';
 			END IF;
          
 		-- Always have an others case
@@ -282,7 +287,7 @@ BEGIN
 	ELSIF(RISING_EDGE(i_clk)) THEN
 		IF(pstate = AWAIT_FINISH) THEN
 			o_valid_frame <= '1';
-			IF(i_pixel_read = '1') THEN
+			IF(i_read_edge = '1') THEN
 				o_pixel_data <= o_pixel_data;
 				o_valid_pixel <= '0';
 				transmit_delay <= 0;
@@ -308,10 +313,10 @@ BEGIN
 	END IF;
 END PROCESS;
 
-timeout : PROCESS(i_clk, i_pixel_read)
+timeout : PROCESS(i_clk, i_read_edge)
 BEGIN
 	IF(RISING_EDGE(i_clk)) THEN
-		IF(i_pixel_read = '1') THEN
+		IF(i_read_edge = '1') THEN
 			IF(timeout_count < TRANSMIT_DELAY_MAX) THEN
 				timeout_count <= timeout_count + 1;
 			ELSE
@@ -335,6 +340,8 @@ BEGIN
 		ELSE
 			i_finished <= '0';
 		END IF;
+		--used for i_lval falling edge detection
+		i_read_delayed <= i_pixel_read;
 	END IF;
 END PROCESS;
 
@@ -342,6 +349,11 @@ END PROCESS;
 --i_lval falling edge detection. lval_edge strobes high one clock period when
 --i_lval toggles from high to low. This works because of the process rowCounting.
 lval_edge <= lval_delayed AND NOT i_lval; 
+
+--i_pixel_read rising edge detection
+i_read_edge <= i_pixel_read AND NOT i_read_delayed;
+
+o_finished <= i_finished;
 
 --look at rowCount to see which buffer we are using. If rowCount is 0 or 1, we are in front buffer,
 --if rowCount is 2 or 3, we are in back buffer.

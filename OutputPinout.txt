@@ -1,0 +1,14 @@
+(discovery wire, pin number on board)
+i_pixel_read = wavegen, 1 #don't use this is an input
+o_valid_frame = 1, 2
+o_valid_pixel = 2, 3
+o_sobel_en = 3, 4
+data7 = 4, 5
+data6 = 5, 6
+data5 = 6, 7
+data4 = 7, 8
+data3 = 8, 9
+data2 = 9, 10
+data1 = 10, 13
+data0 = 11, 14
+o_finished = 0, 15
