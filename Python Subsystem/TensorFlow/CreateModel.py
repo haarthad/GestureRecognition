@@ -21,6 +21,16 @@ NUMBER_OF_EPOCHS =   30
 NUMBER_OF_GESTURES = 6
 BATCH_SIZE =         50
 
+# Transformation matrices
+matrix_rotate_right = cv2.getRotationMatrix2D((X_OF_IMAGES / 2, Y_OF_IMAGES / 2),
+                                              30, 1)
+matrix_rotate_left =  cv2.getRotationMatrix2D((X_OF_IMAGES / 2, Y_OF_IMAGES / 2),
+                                              -30, 1)
+matrix_translate_top_left =  np.float32([[1, 0, -15], [0, 1,  15]])
+matrix_translate_top_right = np.float32([[1, 0,  15], [0, 1,  15]])
+matrix_translate_bot_left =  np.float32([[1, 0, -15], [0, 1, -15]])
+matrix_translate_bot_right = np.float32([[1, 0,  15], [0, 1, -15]])
+
 ###############################################################################
 # Methods
 ###############################################################################
@@ -51,6 +61,90 @@ def selectLabel(image):
     return label
 
 """
+Perform sobel, noise, rotation, and translation transformations on the
+provided image, and return an array of images that have the
+transformations applied.
+:param image: Image to be transformed
+:param path: Filepath to the image
+"""
+def imageTransformation(image,path):
+    images = []
+    noisy_image = image + np.random.normal(0.0, 10.0, image.shape)
+
+    # Force image to use int32
+    image = image.astype('int32')
+    # Apply sobel filter in x and y direction
+    dx = nd.sobel(image, 1)
+    dy = nd.sobel(image, 0)
+    # Combine the two directions into one image
+    sobeled_image = np.hypot(dx, dy)
+    sobeled_image *= 255.0 / np.max(sobeled_image)
+    # Repeat for noisy image
+    dxn = nd.sobel(noisy_image, 1)
+    dyn = nd.sobel(noisy_image, 0)
+    sobeled_noisy_image = np.hypot(dxn, dyn)
+    sobeled_noisy_image *= 255.0 / np.max(sobeled_noisy_image)
+
+    # Apply 30/-30 degree rotation to both images
+    image_rotated_right =       cv2.warpAffine(sobeled_image,
+                                               matrix_rotate_right,
+                                               (X_OF_IMAGES, Y_OF_IMAGES))
+    noisy_image_rotated_right = cv2.warpAffine(sobeled_noisy_image,
+                                               matrix_rotate_right,
+                                               (X_OF_IMAGES, Y_OF_IMAGES))
+    image_rotated_left =        cv2.warpAffine(sobeled_image,
+                                               matrix_rotate_left,
+                                               (X_OF_IMAGES, Y_OF_IMAGES))
+    noisy_image_rotated_left =  cv2.warpAffine(sobeled_noisy_image,
+                                               matrix_rotate_left,
+                                               (X_OF_IMAGES, Y_OF_IMAGES))
+
+    # Translate images
+    image_translated_top_left = cv2.warpAffine(sobeled_image,
+                                               matrix_translate_top_left,
+                                               (X_OF_IMAGES,Y_OF_IMAGES))
+    image_translated_top_right = cv2.warpAffine(sobeled_image,
+                                                matrix_translate_top_right,
+                                                (X_OF_IMAGES,Y_OF_IMAGES))
+    image_translated_bot_left = cv2.warpAffine(sobeled_image,
+                                               matrix_translate_bot_left,
+                                               (X_OF_IMAGES,Y_OF_IMAGES))
+    image_translated_bot_right = cv2.warpAffine(sobeled_image,
+                                                matrix_translate_bot_right,
+                                                (X_OF_IMAGES,Y_OF_IMAGES))
+    noisy_image_translated_top_left = cv2.warpAffine(sobeled_image,
+                                                     matrix_translate_top_left,
+                                                     (X_OF_IMAGES,Y_OF_IMAGES))
+    noisy_image_translated_top_right = cv2.warpAffine(sobeled_image,
+                                                      matrix_translate_top_right,
+                                                      (X_OF_IMAGES,Y_OF_IMAGES))
+    noisy_image_translated_bot_left = cv2.warpAffine(sobeled_image,
+                                                     matrix_translate_bot_left,
+                                                     (X_OF_IMAGES,Y_OF_IMAGES))
+    noisy_image_translated_bot_right = cv2.warpAffine(sobeled_image,
+                                                      matrix_translate_bot_right,
+                                                      (X_OF_IMAGES,Y_OF_IMAGES))
+
+    # Load images into the array for training
+    label = selectLabel(path)
+    images.append([np.array(sobeled_image), label])
+    images.append([np.array(sobeled_noisy_image), label])
+    images.append([np.array(image_rotated_right), label])
+    images.append([np.array(noisy_image_rotated_right), label])
+    images.append([np.array(image_rotated_left), label])
+    images.append([np.array(noisy_image_rotated_left), label])
+    images.append([np.array(image_translated_top_left),label])
+    images.append([np.array(image_translated_top_right),label])
+    images.append([np.array(image_translated_bot_left),label])
+    images.append([np.array(image_translated_bot_right),label])
+    images.append([np.array(noisy_image_translated_top_left),label])
+    images.append([np.array(noisy_image_translated_top_right),label])
+    images.append([np.array(noisy_image_translated_bot_left),label])
+    images.append([np.array(noisy_image_translated_bot_right),label])
+
+    return images
+
+"""
 Reads in all training images, and returns them as TensorFlow images with
 labels attached.
 :return: Training images with labels
@@ -61,45 +155,9 @@ def loadTrainingData():
         path = os.path.join(TRAINING_DATA, i)
         image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
         image = cv2.resize(image, (X_OF_IMAGES, Y_OF_IMAGES))
-        noise = image + np.random.normal(0.0, 10.0, image.shape)
+        train_images.extend(imageTransformation(image,i))
 
-        #Force image to use int32
-        image = image.astype('int32')
-        #Apply sobel filter in x and y direction
-        dx = nd.sobel(image, 1)
-        dy = nd.sobel(image, 0)
-        #Combine the two directions into one image
-        mag = np.hypot(dx, dy)
-        mag *= 255.0 / np.max(mag)
-        #Repeat for noisy image
-        dxn = nd.sobel(noise, 1)
-        dyn = nd.sobel(noise, 0)
-        magn = np.hypot(dxn, dyn)
-        magn *= 255.0 / np.max(magn)
-
-        # Apply 30/-30 degree rotation to both images
-        rows, cols = mag.shape
-        M = cv2.getRotationMatrix2D((cols / 2, rows / 2), 30, 1)
-        rst = cv2.warpAffine(mag, M, (cols, rows))
-        rowsn, colsn = magn.shape
-        M = cv2.getRotationMatrix2D((colsn / 2, rowsn / 2), 30, 1)
-        rstn = cv2.warpAffine(magn, M, (colsn, rowsn))
-        rows, cols = mag.shape
-        M = cv2.getRotationMatrix2D((cols / 2, rows / 2), -30, 1)
-        orst = cv2.warpAffine(mag, M, (cols, rows))
-        rowsn, colsn = magn.shape
-        M = cv2.getRotationMatrix2D((colsn / 2, rowsn / 2), -30, 1)
-        orstn = cv2.warpAffine(magn, M, (colsn, rowsn))
-
-        # Load images into the array for training
-        label = selectLabel(i)
-        train_images.append([np.array(mag), label])
-        train_images.append([np.array(magn), label])
-        train_images.append([np.array(rst), label])
-        train_images.append([np.array(rstn), label])
-        train_images.append([np.array(orst), label])
-        train_images.append([np.array(orstn), label])
-    shuffle(train_images)
+    #shuffle(train_images)
     return train_images
 
 """
@@ -125,8 +183,8 @@ def loadTestingData():
     return test_images
 
 """
-Reads in all personal testing images, and returns them as TensorFlow images with
-labels attached.
+Reads in all personal testing images, and returns them as TensorFlow images
+with labels attached.
 :return: Personal testing images with labels
 """
 def loadPersonalTestingData():
@@ -153,7 +211,7 @@ Plots a single image with the predicted and real gesture underneath the image.
 :param true_label: Correct gesture for the image provided
 :param img: Image to plot
 """
-def plot_image(i, predictions_array, true_label, img):
+def plotImage(i, predictions_array, true_label, img):
     predictions_array = predictions_array[i]
     true_label = true_label[i]
     img = img[i]
@@ -181,7 +239,7 @@ Plots the gesture prediction percentages next to the image.
 :param predictions_array: Array of gesture predictions percentages for image
 :param true_label: Correct gesture for the image provided
 """
-def plot_value_array(i, predictions_array, true_label):
+def plotValueArray(i, predictions_array, true_label):
     predictions_array, true_label = predictions_array[i], true_label[i]
     plt.grid(False)
     plt.xticks([])
@@ -202,7 +260,7 @@ applies a label to each image, and changes the value to be between 0 and 1.
 :param List of images
 :return Reshaped images and their labels
 """
-def process_images(image_list):
+def processImages(image_list):
     # Reshape images to be passed through the convolution layers
     images = np.array([i[0] for i in image_list]) \
         .reshape(-1, X_OF_IMAGES, Y_OF_IMAGES, 1)
@@ -217,7 +275,7 @@ def process_images(image_list):
 Adds layers and other configuration settings to a model
 :return Model with layers and configuration
 """
-def setup_model():
+def setupModel():
     # Set parameters and layers for the model
     model = keras.models.Sequential([
         keras.layers.InputLayer(input_shape=(X_OF_IMAGES,Y_OF_IMAGES,1)),
@@ -265,7 +323,7 @@ category, and the prediction values for the image for each category.
 :param labels Labels for the images
 :param image_list Images to be printed
 """
-def print_accuracy_graph(model, images, labels, image_list):
+def printAccuracyGraph(model, images, labels, image_list):
     # Get category percentages for all test images
     predictions = model.predict(images)
 
@@ -277,9 +335,9 @@ def print_accuracy_graph(model, images, labels, image_list):
     plt.figure(figsize=(2*2*num_cols, 2*num_rows))
     for i in range(num_images):
         plt.subplot(num_rows, 2*num_cols, 2*i+1)
-        plot_image(i, predictions, labels, image_list)
+        plotImage(i, predictions, labels, image_list)
         plt.subplot(num_rows, 2*num_cols, 2*i+2)
-        plot_value_array(i, predictions, labels)
+        plotValueArray(i, predictions, labels)
     plt.show()
 
 
@@ -293,12 +351,12 @@ testing_image_list =       loadTestingData()
 extra_testing_image_list = loadPersonalTestingData()
 
 # Reshape images and preprocess values
-training_images, training_labels = process_images(training_image_list)
-testing_images, testing_labels = process_images(testing_image_list)
-extra_testing_images, extra_testing_labels = process_images(extra_testing_image_list)
+training_images, training_labels = processImages(training_image_list)
+testing_images, testing_labels = processImages(testing_image_list)
+extra_testing_images, extra_testing_labels = processImages(extra_testing_image_list)
 
 # Setup layers and other configuration settings for the model
-image_recognition_model = setup_model()
+image_recognition_model = setupModel()
 
 # Create model based on above parameters for the training images
 image_recognition_model.fit(training_images,
@@ -320,10 +378,10 @@ print('Testing accuracy:', testing_accuracy)
 print('Personal testing accuracy:', personal_accuracy)
 
 # Print prediction values for each image in the ExtraTest folder
-print_accuracy_graph(image_recognition_model,
-                     extra_testing_images,
-                     extra_testing_labels,
-                     extra_testing_image_list)
+printAccuracyGraph(image_recognition_model,
+                   extra_testing_images,
+                   extra_testing_labels,
+                   extra_testing_image_list)
 
 # Save model
 image_recognition_model.save('./SavedModels/image_recognition_model.h5')

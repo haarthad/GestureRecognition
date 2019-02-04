@@ -14,13 +14,17 @@ def getLoc():
 #weather API documentation : https://pypi.org/project/weather-api/
 def getWeatherString():
     weather = Weather(Unit.FAHRENHEIT)
-    latlon = getLoc();
-    lookup = weather.lookup_by_latlng(latlon[0], latlon[1])
-    condition = lookup.condition
-    print(condition.text + ',' + condition.temp + "F")
+    latlon = getLoc()
+    try:
+        lookup = weather.lookup_by_latlng(latlon[0], latlon[1])
+        condition = lookup.condition
+        print(condition.text + ',' + condition.temp + "F")
+    except requests.exceptions.ConnectionError:
+        print("Weather API connection refused")
+
 
 def main():
-	getWeatherString()
+    getWeatherString()
 	
 if __name__ == "__main__":
     main()

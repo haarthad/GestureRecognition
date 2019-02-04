@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 from queue import Empty
 from DeviceCommands import CalendarGrabber, TimeGrabber, SportsGrabber, Timer, WeatherGrabber
+import Logging as logger
 
 ###############################################################################
 # Methods
@@ -38,7 +39,7 @@ validates all pixel values, runs image through model to get prediction
 values, and runs the gesture command associated with the largest prediction 
 value
 """
-def processImage(pixel_queue, error_queue, model):
+def processImage(pixel_queue, error_queue, model, commands_path):
     try:
         # Grab image from queue if any, timeout after 5 seconds
         image = pixel_queue.get(True, 5)
@@ -74,7 +75,7 @@ def processImage(pixel_queue, error_queue, model):
         TimeGrabber.main()
     elif predicted_gesture == 2:
         print("IR - Gesture C")
-        CalendarGrabber.main()
+        CalendarGrabber.main(commands_path)
     elif predicted_gesture == 3:
         print("IR - Gesture G")
         SportsGrabber.main()
@@ -86,18 +87,22 @@ def processImage(pixel_queue, error_queue, model):
     else:
         print("ERROR - IR - Invalid Gesture")
 
+    # Add spacer line
+    print("\r\n")
+
 
 ###############################################################################
 # Main logic
 ###############################################################################
 
-def runRecognition(pixel_queue, error_queue, model_path):
+def runRecognition(pixel_queue, error_queue, model_path, commands_path):
     # Load default model
     image_recognition_model = initRecognition(model_path)
 
     # Constantly read in and process images
     while True:
-        processImage(pixel_queue,error_queue,image_recognition_model)
+        processImage(pixel_queue,error_queue,image_recognition_model,
+                     commands_path)
 
 
 

@@ -1,7 +1,7 @@
 import sys, time
-from pygame import mixer
+import pygame
 
-def Timer():
+def Timer(commands_path):
     sec = 0
     min = 1
     looper = True
@@ -17,14 +17,20 @@ def Timer():
         else:
             looper = False
 
+    print("\r\n")
+
 # https://stackoverflow.com/questions/2936914/pygame-sounds-dont-play
-    mixer.init()
-    sound = mixer.Sound('Assets\Slrt.wav')
-    sound.play()
-    time.sleep(3)
+    try:
+        pygame.mixer.init()
+        sound = pygame.mixer.Sound(commands_path + 'Assets\Slrt.wav')
+        sound.play()
+        time.sleep(3)
+    except pygame.error:
+        print("Could not find an available audio device")
+
 
 def main():
-	Timer()
+    Timer("")
 	
 if __name__ == "__main__":
     main()
