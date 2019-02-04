@@ -9,8 +9,8 @@ except RuntimeError:
 # Done on top level so that they can be easily called
 pixelInput1, pixelInput2, pixelInput3 = 8, 10, 12
 pixelInput4, pixelInput5, pixelInput6 = 16, 18, 22
-pixelInput7, pixelInput8, validFrame = 24, 26, 32
-readFinished, startOfImage, pixelStable = 36, 38, 40
+pixelInput7, pixelInput8, readFinished  = 24, 26, 32
+startOfImage, pixelStable = 36, 38
 
 
 # Initialize all of the GPIO ports
@@ -29,7 +29,6 @@ def pixelReceptionInit():
     GPIO.setup(pixelInput7, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(pixelInput8, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(startOfImage, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    GPIO.setup(validFrame, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(pixelStable, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
     GPIO.setup(readFinished, GPIO.OUT, initial=GPIO.LOW)

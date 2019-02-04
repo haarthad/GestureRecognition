@@ -5,6 +5,7 @@ import PIL
 from PIL import Image
 import cv2
 from multiprocessing import Queue
+import time
 try:
     import RPi.GPIO as GPIO
 except RuntimeError:
@@ -24,7 +25,7 @@ def pixelEnqueue(pixelQueue, errorQueue):
     # Initialize the list with the right amount of pixel data.
     # In the future this will be modified to be a list of lists.
     # The overall list will be the number of pixels, and then each sublist is 8 large.
-    pixelList = np.zeros([318, 238])
+    pixelList = np.zeros([240, 320])
     errorDetect = 0
 
     # Initialize the GPIOS.
@@ -33,13 +34,14 @@ def pixelEnqueue(pixelQueue, errorQueue):
     while True:
         xIter = 0
         yIter = 0
-
-        if GPIO.event_detected(gm.startOfImage) and GPIO.input(gm.validFrame):
-            while yIter < 238 and GPIO.input(gm.validFrame):
+        if GPIO.input(gm.startOfImage):
+            while yIter < 240 and GPIO.input(gm.startOfImage):
                 xIter = 0
-                while xIter < 318 and GPIO.input(gm.validFrame):
+                if yIter == 0:
+                    xIter = 23
+                while xIter < 320 and GPIO.input(gm.startOfImage):
                     GPIO.output(gm.readFinished, GPIO.LOW)
-                    if GPIO.input(gm.pixelStable) and GPIO.input(gm.validFrame):
+                    if GPIO.input(gm.pixelStable) and GPIO.input(gm.startOfImage):
                         tempBinVal = "" + str(inputConversion(gm.pixelInput1)) + str(
                             inputConversion(gm.pixelInput2)) + str(
                             inputConversion(gm.pixelInput3)) + str(inputConversion(gm.pixelInput4)) + str(
@@ -47,8 +49,10 @@ def pixelEnqueue(pixelQueue, errorQueue):
                             inputConversion(gm.pixelInput6)) + str(inputConversion(gm.pixelInput7)) + str(
                             inputConversion(gm.pixelInput8))
                         pixelVal = int(tempBinVal, 2)
-                        pixelList[xIter, yIter] = pixelVal
+                        pixelList[yIter, xIter] = pixelVal
                         GPIO.output(gm.readFinished, GPIO.HIGH)
+                        dummy = 67.89/2.76
+                        dummy = dummy/36.54
                         xIter += 1
                         errorDetect = 0
                     else:
@@ -57,7 +61,10 @@ def pixelEnqueue(pixelQueue, errorQueue):
                         print("Pixel not stable for 500 loops, must have been an error")
 
                 yIter += 1
-            imgToSend = Image.fromarray(pixelList, 'L')
+            cv2.imwrite("test.png", pixelList)
+            GPIO.cleanup()
+            print(pixelList)
+            break
             try:
                 pixelQueue.put(imgToSend, True, 5)
             except Queue.full:
