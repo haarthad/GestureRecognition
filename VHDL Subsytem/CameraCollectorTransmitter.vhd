@@ -38,6 +38,7 @@ PORT(
 	i_lval             : IN STD_LOGIC;
 	i_fval             : IN STD_LOGIC;
 	i_pixel_read       : IN STD_LOGIC;
+	--i_reset            : IN STD_LOGIC;
 	o_pixel_data       : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
 	o_valid_frame      : OUT STD_LOGIC := '0';
 	o_valid_pixel      : OUT STD_LOGIC := '0';
@@ -97,7 +98,7 @@ END COMPONENT;
 SIGNAL pixelCount        : INTEGER := 0; --\/
 SIGNAL rowCount          : INTEGER := 0; --\/
 SIGNAL write_en_wire     : STD_LOGIC; --\/
-SIGNAL write_select_wire : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0); --\/
+SIGNAL write_select_wire : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0) := (OTHERS => '0'); --\/
 SIGNAL write_data_wire   : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0); --\/
 SIGNAL selectA_wire      : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0) := (OTHERS => '0'); --\/
 SIGNAL selectB_wire      : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0) := (OTHERS => '0'); --\/
@@ -109,7 +110,7 @@ SIGNAL out_regC_wire     : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0) := (OTHERS
 SIGNAL out_regD_wire     : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0) := (OTHERS => '0'); --\/
 SIGNAL lval_delayed      : STD_LOGIC := '0'; --\/
 SIGNAL lval_edge         : STD_LOGIC; --\/
-SIGNAL i_swapped_wire    : STD_LOGIC; --\/
+SIGNAL i_swapped_wire    : STD_LOGIC := '0'; --\/
 SIGNAL i_finished        : STD_LOGIC; --\/
 SIGNAL send_count        : INTEGER := 0;
 SIGNAL transmit_delay    : INTEGER := 0;
@@ -313,29 +314,12 @@ BEGIN
 	END IF;
 END PROCESS;
 
-timeout : PROCESS(i_clk, i_read_edge)
-BEGIN
-	IF(RISING_EDGE(i_clk)) THEN
-		IF(i_read_edge = '1') THEN
-			IF(timeout_count < TRANSMIT_DELAY_MAX) THEN
-				timeout_count <= timeout_count + 1;
-			ELSE
-				timeout_count <= timeout_count;
-			END IF;
-		ELSE
-			timeout_count <= 0;
-		END IF;
-	END IF;
-END PROCESS;
-
 selectSram_wire <= STD_LOGIC_VECTOR(TO_UNSIGNED(send_count, selectSram_wire'LENGTH));
 
 PROCESS(i_clk)
 BEGIN
 	IF(RISING_EDGE(i_clk)) THEN
 		IF(send_count = TRANSMIT_NUMBER - 1) THEN
-			i_finished <= '1';
-		ELSIF(timeout_count = TRANSMIT_DELAY_MAX) THEN
 			i_finished <= '1';
 		ELSE
 			i_finished <= '0';

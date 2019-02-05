@@ -98,10 +98,10 @@ pixel_generation: PROCESS(i_clk)
 BEGIN
 	IF(RISING_EDGE(i_clk)) THEN
 		IF(pixel_gen_switch = '1') THEN
-			IF(lval_gen > 489) THEN
+			IF(lval_gen > 649) THEN
 				lval_gen <= 0;
 				i_lval <= '0';
-			ELSIF(lval_gen < 480) THEN
+			ELSIF(lval_gen < 640) THEN
 				lval_gen <= lval_gen +1;
 				i_lval <= '1';
 				total_sent <= total_sent + 1;
