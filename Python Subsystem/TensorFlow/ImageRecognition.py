@@ -1,3 +1,5 @@
+import sys
+sys.path.append("..")
 from tensorflow import keras
 import cv2
 import numpy as np

@@ -1,3 +1,5 @@
+import sys
+sys.path.append("../..")
 from multiprocessing import Process, Queue
 import cv2
 import numpy as np
