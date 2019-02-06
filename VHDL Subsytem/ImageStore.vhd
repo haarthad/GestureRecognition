@@ -206,7 +206,7 @@ BEGIN
 	END IF;
 END PROCESS;
 
-greyscalePixel <= greyscaleTemp(7 downto 0);--(11 DOWNTO 4);
+greyscalePixel <= greyscaleTemp(9 downto 2);--(11 DOWNTO 4);
 
 o_selectA <= STD_LOGIC_VECTOR(TO_UNSIGNED(regA, o_selectA'LENGTH));
 o_selectB <= STD_LOGIC_VECTOR(TO_UNSIGNED(regB, o_selectB'LENGTH));

@@ -42,7 +42,7 @@ CONSTANT T_clk : TIME:= 20 ns; -- 50MHz clock period
 	SIGNAL i_pixel_data       : STD_LOGIC_VECTOR(11 DOWNTO 0);
 	SIGNAL i_lval             : STD_LOGIC := '0';
 	SIGNAL i_fval             : STD_LOGIC;
-	SIGNAL i_pixel_read       : STD_LOGIC;
+	SIGNAL i_pixel_read       : STD_LOGIC := '0';
 	SIGNAL o_pixel_data       : STD_LOGIC_VECTOR(7 DOWNTO 0);
 	SIGNAL o_valid_frame      : STD_LOGIC;
 	SIGNAL o_valid_pixel      : STD_LOGIC;
@@ -124,13 +124,11 @@ read_generation: PROCESS(i_clk)
 BEGIN
 	IF(read_gen_switch = '1') THEN
 		IF(read_gen_delay < 4) THEN
-			i_pixel_read <= '0';
 			read_gen_delay <= read_gen_delay + 1;
 		ELSIF(read_gen_delay = 4) THEN
-			i_pixel_read <= '1';
 			read_gen_delay <= read_gen_delay + 1;
+			i_pixel_read <= NOT i_pixel_read;
 		ELSE
-			i_pixel_read <= '0';
 			read_gen_delay <= 0;
 		END IF;
 	ELSE

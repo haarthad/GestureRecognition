@@ -110,7 +110,7 @@ SIGNAL out_regC_wire     : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0) := (OTHERS
 SIGNAL out_regD_wire     : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0) := (OTHERS => '0'); --\/
 SIGNAL lval_delayed      : STD_LOGIC := '0'; --\/
 SIGNAL lval_edge         : STD_LOGIC; --\/
-SIGNAL i_swapped_wire    : STD_LOGIC := '0'; --\/
+SIGNAL i_swapped_wire    : STD_LOGIC; --\/
 SIGNAL i_finished        : STD_LOGIC; --\/
 SIGNAL send_count        : INTEGER := 0;
 SIGNAL transmit_delay    : INTEGER := 0;
@@ -119,6 +119,8 @@ SIGNAL sram_wire         : STD_LOGIC_VECTOR(GREYSCALE_PIXEL_WIDTH - 1 DOWNTO 0);
 SIGNAL timeout_count     : INTEGER := 0; --\/
 SIGNAL i_read_delayed    : STD_LOGIC := '0';
 SIGNAL i_read_edge       : STD_LOGIC := '0';
+SIGNAL i_read_edge1      : STD_LOGIC := '0';
+SIGNAL i_read_edge2      : STD_LOGIC := '0';
 
 BEGIN
 --========================================
@@ -335,7 +337,11 @@ END PROCESS;
 lval_edge <= lval_delayed AND NOT i_lval; 
 
 --i_pixel_read rising edge detection
-i_read_edge <= i_pixel_read AND NOT i_read_delayed;
+i_read_edge1 <= i_pixel_read AND NOT i_read_delayed;
+--i_pixel_read falling edge detection
+i_read_edge2 <= i_read_delayed AND NOT i_pixel_read;
+--i_pixel_read double edge detection
+i_read_edge <= i_read_edge1 OR i_read_edge2;
 
 o_finished <= i_finished;
 
