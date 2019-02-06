@@ -111,7 +111,7 @@ SIGNAL out_regD_wire     : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0) := (OTHERS
 SIGNAL lval_delayed      : STD_LOGIC := '0'; --\/
 SIGNAL lval_edge         : STD_LOGIC; --\/
 SIGNAL i_swapped_wire    : STD_LOGIC; --\/
-SIGNAL i_finished        : STD_LOGIC; --\/
+SIGNAL i_finished        : STD_LOGIC := '0'; --\/
 SIGNAL send_count        : INTEGER := 0;
 SIGNAL transmit_delay    : INTEGER := 0;
 SIGNAL selectSram_wire   : STD_LOGIC_VECTOR(GREYSCALE_REG_NUM_BIN-1 DOWNTO 0); --\/
@@ -286,7 +286,7 @@ BEGIN
 		o_valid_pixel <= '0';
 		o_valid_frame <= '0';
 		transmit_delay <= 0;
-		send_count <= 0;
+		send_count <= 0; --PROBLEM?
 	ELSIF(RISING_EDGE(i_clk)) THEN
 		IF(pstate = AWAIT_FINISH) THEN
 			o_valid_frame <= '1';
@@ -321,10 +321,10 @@ selectSram_wire <= STD_LOGIC_VECTOR(TO_UNSIGNED(send_count, selectSram_wire'LENG
 PROCESS(i_clk)
 BEGIN
 	IF(RISING_EDGE(i_clk)) THEN
-		IF(send_count = TRANSMIT_NUMBER - 1) THEN
-			i_finished <= '1';
-		ELSE
+		IF(send_count < TRANSMIT_NUMBER - 1) THEN
 			i_finished <= '0';
+		ELSE
+			i_finished <= '1';
 		END IF;
 		--used for i_lval falling edge detection
 		i_read_delayed <= i_pixel_read;
