@@ -296,10 +296,11 @@ BEGIN
 				transmit_delay <= 0;
 				send_count <= send_count + 1;
 			ELSE
-				IF(transmit_delay = 0) THEN
+				IF(transmit_delay < 5000) THEN
 					o_pixel_data <= sram_wire;
 					transmit_delay <= transmit_delay + 1;
-				ELSIF(transmit_delay = 1) THEN
+					o_valid_pixel <= '0';--[]
+				ELSIF(transmit_delay = 10) THEN
 					o_pixel_data <= o_pixel_data;
 					o_valid_pixel <= '1';
 					transmit_delay <= transmit_delay + 1;
