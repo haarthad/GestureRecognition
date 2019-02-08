@@ -31,6 +31,7 @@ def pixelEnqueue(pixelQueue, errorQueue):
     # Initialize the GPIOS.
     gm.pixelReceptionInit()
     GPIO.output(gm.readFinished, GPIO.LOW)
+    prevPixelStable = GPIO.input(gm.pixelStable)
     # For testing purposes run in a loop.
     while True:
         xIter = 0
@@ -41,7 +42,8 @@ def pixelEnqueue(pixelQueue, errorQueue):
                 if yIter == 0:
                     xIter = 0
                 while xIter < 320 and GPIO.input(gm.startOfImage):
-                    if GPIO.input(gm.pixelStable) and GPIO.input(gm.startOfImage):
+                    if (GPIO.input(gm.pixelStable) != prevPixelStable) and GPIO.input(gm.startOfImage):
+                        prevPixelStable = GPIO.input(gm.pixelStable)
                         tempBinVal = "" + str(inputConversion(gm.pixelInput1)) + str(
                             inputConversion(gm.pixelInput2)) + str(
                             inputConversion(gm.pixelInput3)) + str(inputConversion(gm.pixelInput4)) + str(
