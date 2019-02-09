@@ -7,6 +7,8 @@ from queue import Empty
 from DeviceCommands import CalendarGrabber, TimeGrabber, SportsGrabber, Timer, WeatherGrabber
 import Logging as logger
 
+NEW_GESTURE = True
+
 ###############################################################################
 # Methods
 ###############################################################################
@@ -41,7 +43,7 @@ validates all pixel values, runs image through model to get prediction
 values, and runs the gesture command associated with the largest prediction 
 value
 """
-def processImage(pixel_queue, error_queue, model, commands_path):
+def processImage(pixel_queue, error_queue, model, commands_path, new_gesture):
     try:
         # Grab image from queue if any, timeout after 5 seconds
         image = pixel_queue.get(True, 5)
@@ -69,28 +71,36 @@ def processImage(pixel_queue, error_queue, model, commands_path):
     predicted_gesture = np.argmax(prediction[0])
 
     # Call correct command for the predicted gesture
-    if predicted_gesture == 0:
-        print("IR - Gesture A")
-        Timer.main()
-    elif predicted_gesture == 1:
-        print("IR - Gesture B")
-        TimeGrabber.main()
-    elif predicted_gesture == 2:
-        print("IR - Gesture C")
-        CalendarGrabber.main(commands_path)
-    elif predicted_gesture == 3:
-        print("IR - Gesture G")
-        SportsGrabber.main()
-    elif predicted_gesture == 4:
-        print("IR - Gesture V")
-        WeatherGrabber.main()
-    elif predicted_gesture == 5:
-        print("IR - Gesture Nothing")
+    if new_gesture:
+        if predicted_gesture == 0:
+            print("IR - Gesture A")
+            Timer.main()
+        elif predicted_gesture == 1:
+            print("IR - Gesture B")
+            TimeGrabber.main()
+        elif predicted_gesture == 2:
+            print("IR - Gesture C")
+            CalendarGrabber.main(commands_path)
+        elif predicted_gesture == 3:
+            print("IR - Gesture G")
+            SportsGrabber.main()
+        elif predicted_gesture == 4:
+            print("IR - Gesture V")
+            WeatherGrabber.main()
+        elif predicted_gesture == 5:
+            print("IR - Gesture Nothing")
+        else:
+            print("ERROR - IR - Invalid Gesture")
+
+        new_gesture = False
     else:
-        print("ERROR - IR - Invalid Gesture")
+        if predicted_gesture == 5:
+            new_gesture = True
 
     # Add spacer line
     print("\r\n")
+
+    return new_gesture
 
 
 ###############################################################################
@@ -98,13 +108,17 @@ def processImage(pixel_queue, error_queue, model, commands_path):
 ###############################################################################
 
 def runRecognition(pixel_queue, error_queue, model_path, commands_path):
+    new_gesture = False
+
     # Load default model
     image_recognition_model = initRecognition(model_path)
 
     # Constantly read in and process images
     while True:
-        processImage(pixel_queue,error_queue,image_recognition_model,
-                     commands_path)
+        new_gesture = processImage(pixel_queue,
+                                   error_queue,
+                                   image_recognition_model,
+                                   commands_path, new_gesture)
 
 
 
