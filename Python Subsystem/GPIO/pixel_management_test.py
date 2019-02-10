@@ -37,12 +37,19 @@ def pixelEnqueue(pixelQueue, stableQueue, finishedQueue, sendQueue):
 
 
 def picSender(pixelQueue, stableQueue, finishedQueue):
+    nothing_gesture = True
     sleep(1)
     while 1:
             print("Perform Gesture.")
-            sleep(5)
+            sleep(2)
             print("Gesture Captured")
-            img = cv2.imread("pictosend.png", 0)
+            if nothing_gesture:
+                img = cv2.imread("nothing.png", 0)
+                nothing_gesture = False
+            else:
+                img = cv2.imread("pictosend.png", 0)
+                nothing_gesture = True
+
             i = 0
             while i < 240:
                 j = 0
