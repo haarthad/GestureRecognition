@@ -46,7 +46,7 @@ value
 def processImage(pixel_queue, error_queue, model, commands_path, new_gesture):
     try:
         # Grab image from queue if any, timeout after 5 seconds
-        image = pixel_queue.get(True, 5)
+        image = pixel_queue.get(True, 30)
     except Empty:
         print("ERROR - IR - Max timeout (5 seconds) exceeded")
         return

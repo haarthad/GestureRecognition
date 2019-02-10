@@ -1,5 +1,5 @@
 import numpy as np
-#from multiprocessing import Process, Queue
+from time import sleep
 import cv2
 
 
@@ -37,22 +37,22 @@ def pixelEnqueue(pixelQueue, stableQueue, finishedQueue, sendQueue):
 
 
 def picSender(pixelQueue, stableQueue, finishedQueue):
+    sleep(1)
     while 1:
-        try:
-            throwaway = input("Press key to read pic.\n")
-        except EOFError:
-            pass
-        img = cv2.imread("pictosend.png", 0)
-        i = 0
-        while i < 240:
-            j = 0
-            while j < 320:
-                graypix = img[i,j]
-                finishedQueue.get()
-                pixelQueue.put(graypix)
-                stableQueue.put('1')
-                j += 1
-            i += 1
+            print("Perform Gesture.")
+            sleep(5)
+            print("Gesture Captured")
+            img = cv2.imread("pictosend.png", 0)
+            i = 0
+            while i < 240:
+                j = 0
+                while j < 320:
+                    graypix = img[i,j]
+                    finishedQueue.get()
+                    pixelQueue.put(graypix)
+                    stableQueue.put('1')
+                    j += 1
+                i += 1
 
 
 
