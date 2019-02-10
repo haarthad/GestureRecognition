@@ -17,7 +17,7 @@ EXTRA_TESTING_DATA = 'ImageData/ExtraTest'
 GESTURE_NAMES =      ['A', 'B', 'C', 'G', 'V', 'Nothing']
 X_OF_IMAGES =        64
 Y_OF_IMAGES =        64
-NUMBER_OF_EPOCHS =   30
+NUMBER_OF_EPOCHS =   20
 NUMBER_OF_GESTURES = 6
 BATCH_SIZE =         50
 
@@ -157,7 +157,7 @@ def loadTrainingData():
         image = cv2.resize(image, (X_OF_IMAGES, Y_OF_IMAGES))
         train_images.extend(imageTransformation(image,i))
 
-    #shuffle(train_images)
+    shuffle(train_images)
     return train_images
 
 """
@@ -287,14 +287,14 @@ def setupModel():
                             input_shape=(X_OF_IMAGES,Y_OF_IMAGES,1)),
         keras.layers.MaxPool2D(pool_size=5,
                                padding='same'),
-        keras.layers.Conv2D(filters=50,
+        keras.layers.Conv2D(filters=64,
                             kernel_size=5,
                             strides=1,
                             padding='same',
                             activation='relu'),
         keras.layers.MaxPool2D(pool_size=5,
                                padding='same'),
-        keras.layers.Conv2D(filters=80,
+        keras.layers.Conv2D(filters=75,
                             kernel_size=5,
                             strides=1,
                             padding='same',
@@ -303,7 +303,7 @@ def setupModel():
                                padding='same'),
         keras.layers.Dropout(0.25),
         keras.layers.Flatten(input_shape=(64,64)),
-        keras.layers.Dense(128, activation=tf.nn.relu),
+        keras.layers.Dense(256, activation=tf.nn.relu),
         keras.layers.Dropout(0.5),
         keras.layers.Dense(NUMBER_OF_GESTURES, activation=tf.nn.softmax),
     ])
@@ -369,13 +369,13 @@ training_loss, training_accuracy = image_recognition_model.evaluate(training_ima
                                                   training_labels)
 testing_loss, testing_accuracy = image_recognition_model.evaluate(testing_images,
                                                 testing_labels)
-personal_loss, personal_accuracy = image_recognition_model.evaluate(extra_testing_images,
+extra_loss, extra_accuracy = image_recognition_model.evaluate(extra_testing_images,
                                                   extra_testing_labels)
 
 # Print accuracy percentages for each image folder
 print('Training accuracy:', training_accuracy)
 print('Testing accuracy:', testing_accuracy)
-print('Personal testing accuracy:', personal_accuracy)
+print('Extra testing accuracy:', extra_accuracy)
 
 # Print prediction values for each image in the ExtraTest folder
 printAccuracyGraph(image_recognition_model,
