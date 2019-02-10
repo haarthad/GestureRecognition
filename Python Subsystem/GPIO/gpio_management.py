@@ -9,7 +9,7 @@ except RuntimeError:
 # Done on top level so that they can be easily called
 pixelInput1, pixelInput2, pixelInput3 = 8, 10, 12
 pixelInput4, pixelInput5, pixelInput6 = 16, 18, 22
-pixelInput7, pixelInput8, readFinished  = 24, 26, 32
+pixelInput7, pixelInput8, readFinished = 24, 26, 32
 startOfImage, pixelStable = 36, 38
 
 
@@ -19,7 +19,7 @@ def pixelReceptionInit():
     # This is nice because GPIO numbers don't change between pi board revisions
     GPIO.setmode(GPIO.BOARD)
     # Set the GPIOS to either inputs or outputs and set them all to pull down
-
+    # This can be done with a channel list but doing that hides errors and warnings.
     GPIO.setup(pixelInput1, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(pixelInput2, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(pixelInput3, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
@@ -32,6 +32,4 @@ def pixelReceptionInit():
     GPIO.setup(pixelStable, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
     GPIO.setup(readFinished, GPIO.OUT, initial=GPIO.LOW)
-    # Add an event to detect the start of the image signal
-    # Later on use GPIO.event_detected(channel) to check if an image has started
-    GPIO.add_event_detect(startOfImage, GPIO.RISING)
+
