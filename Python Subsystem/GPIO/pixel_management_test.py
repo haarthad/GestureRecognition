@@ -16,12 +16,12 @@ def pixelEnqueue(pixelQueue, stableQueue, finishedQueue, sendQueue):
     # The overall list will be the number of pixels, and then each sublist is 8 large.
     finishedQueue.put('1')
     while 1:
-        pixelList = np.zeros([240, 320])
+        pixelList = np.zeros([64, 64])
         yIter = 0
         # For testing purposes run in a loop.
-        while yIter < 240:
+        while yIter < 64:
             xIter = 0
-            while xIter < 320:
+            while xIter < 64:
                 stableQueue.get()
                 pix = pixelQueue.get()
                 pixelList[yIter, xIter] = pix
@@ -51,9 +51,9 @@ def picSender(pixelQueue, stableQueue, finishedQueue):
                 nothing_gesture = True
 
             i = 0
-            while i < 240:
+            while i < 64:
                 j = 0
-                while j < 320:
+                while j < 64:
                     graypix = img[i, j]
                     finishedQueue.get()
                     pixelQueue.put(graypix)
