@@ -1,11 +1,15 @@
 import sys
 sys.path.append("..")
-from tensorflow import keras
+import keras
+from keras.models import load_model
+from keras.utils import CustomObjectScope
+from keras.initializers import glorot_uniform
 import cv2
 import numpy as np
 from queue import Empty
 from DeviceCommands import CalendarGrabber, TimeGrabber, SportsGrabber, Timer, WeatherGrabber
 import Logging as logger
+import scipy.ndimage as nd
 
 NEW_GESTURE = True
 
@@ -20,7 +24,8 @@ the default model that was created earlier.
 """
 def initRecognition(model_path):
     # Load image recognition model
-    loaded_model = keras.models.load_model(model_path)
+    with CustomObjectScope({'GlorotUniform': glorot_uniform()}):
+        loaded_model = load_model(model_path)
     print("IR - Successfully loaded model")
     return loaded_model
 
@@ -32,7 +37,7 @@ Validates that all pixel values in the image are within valid pixel ranges,
 """
 def validateImage(image):
     for x in np.nditer(image):
-        if x >255.0 or x < 0.0:
+        if x > 255.0 or x < 0.0:
             return 1
     return 0
 
@@ -58,6 +63,13 @@ def processImage(pixel_queue, error_queue, model, commands_path, new_gesture):
     else:
         print("ERROR - IR - Invalid Image")
         return
+
+    # Apply sobel filter to image
+    image = image.astype('int32')
+    dx = nd.sobel(image, 1)
+    dy = nd.sobel(image, 0)
+    image = np.hypot(dx, dy)
+    image *= 255.0 / np.max(image)
 
     # Reformat image data to work with the model
     image = cv2.resize(image, (64, 64))
@@ -95,6 +107,7 @@ def processImage(pixel_queue, error_queue, model, commands_path, new_gesture):
         new_gesture = False
     else:
         if predicted_gesture == 5:
+            print("IR - Gesture Reset")
             new_gesture = True
 
     # Add spacer line
