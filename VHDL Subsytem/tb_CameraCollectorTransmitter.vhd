@@ -27,7 +27,9 @@ PORT(
 	i_pixel_read       : IN STD_LOGIC;
 	o_pixel_data       : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
 	o_valid_frame      : OUT STD_LOGIC;
-	o_valid_pixel      : OUT STD_LOGIC                      
+	o_valid_pixel      : OUT STD_LOGIC;
+	o_sobel_en         : OUT STD_LOGIC;
+	o_finished         : OUT STD_LOGIC	
 );
 END COMPONENT;
 --========================================
@@ -46,6 +48,8 @@ CONSTANT T_clk : TIME:= 20 ns; -- 50MHz clock period
 	SIGNAL o_pixel_data       : STD_LOGIC_VECTOR(7 DOWNTO 0);
 	SIGNAL o_valid_frame      : STD_LOGIC;
 	SIGNAL o_valid_pixel      : STD_LOGIC;
+	SIGNAL o_sobel_en         : STD_LOGIC;
+	SIGNAL o_finished         : STD_LOGIC;
 	SIGNAL pixel_gen_switch   : STD_LOGIC := '0';
 	SIGNAL pixel_gen          : STD_LOGIC_VECTOR(11 DOWNTO 0) := "000000000000"; 
 	SIGNAL lval_gen           : INTEGER := 0;
@@ -76,7 +80,9 @@ PORT MAP(
 	i_pixel_read  => i_pixel_read, 
    o_pixel_data  => o_pixel_data, 
    o_valid_frame => o_valid_frame,  
-   o_valid_pixel => o_valid_pixel 
+   o_valid_pixel => o_valid_pixel,
+	o_sobel_en    => o_sobel_en,
+	o_finished    => o_finished
 );
 
 --========================================

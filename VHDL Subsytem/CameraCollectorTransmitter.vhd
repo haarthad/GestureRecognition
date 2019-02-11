@@ -43,7 +43,8 @@ PORT(
 	o_valid_frame      : OUT STD_LOGIC := '0';
 	o_valid_pixel      : OUT STD_LOGIC := '0';
 	o_sobel_en         : OUT STD_LOGIC := '0';
-	o_finished         : OUT STD_LOGIC
+	o_finished         : OUT STD_LOGIC := '0';
+	o_edgeTest         : OUT STD_LOGIC
 );
 END CameraCollectorTransmitter;
 
@@ -259,6 +260,7 @@ BEGIN
 				write_en_wire <= '0';
 			END IF;
 			--used for i_lval falling edge detection
+			
 			lval_delayed <= i_lval;
 			--if i_lval had a falling edge increment rowCount
 			IF(lval_edge = '1') THEN
@@ -292,21 +294,21 @@ BEGIN
 			o_valid_frame <= '1';
 			IF(i_read_edge = '1') THEN
 				o_pixel_data <= o_pixel_data;
-				o_valid_pixel <= '0';
+				o_valid_pixel <= o_valid_pixel;
 				transmit_delay <= 0;
 				send_count <= send_count + 1;
 			ELSE
-				IF(transmit_delay < 5000) THEN
+				IF(transmit_delay < 1) THEN
 					o_pixel_data <= sram_wire;
 					transmit_delay <= transmit_delay + 1;
-					o_valid_pixel <= '0';--[]
-				ELSIF(transmit_delay = 10) THEN
+					o_valid_pixel <= o_valid_pixel;
+				ELSIF(transmit_delay = 1) THEN
 					o_pixel_data <= o_pixel_data;
-					o_valid_pixel <= '1';
+					o_valid_pixel <= NOT o_valid_pixel;
 					transmit_delay <= transmit_delay + 1;
 				ELSE
 					o_pixel_data <= o_pixel_data;
-					o_valid_pixel <= '1';
+					o_valid_pixel <= o_valid_pixel;
 					transmit_delay <= transmit_delay;
 				END IF;
 				send_count <= send_count;
@@ -327,8 +329,17 @@ BEGIN
 		ELSE
 			i_finished <= '1';
 		END IF;
-		--used for i_lval falling edge detection
+		
+	END IF;
+END PROCESS;
+
+PROCESS(i_clk)
+BEGIN
+	IF(FALLING_EDGE(i_clk)) THEN
+		--used for i_read edge detection
 		i_read_delayed <= i_pixel_read;
+		--i_pixel_read double edge detection
+		i_read_edge <= i_read_edge1 OR i_read_edge2;
 	END IF;
 END PROCESS;
 
@@ -342,9 +353,11 @@ i_read_edge1 <= i_pixel_read AND NOT i_read_delayed;
 --i_pixel_read falling edge detection
 i_read_edge2 <= i_read_delayed AND NOT i_pixel_read;
 --i_pixel_read double edge detection
-i_read_edge <= i_read_edge1 OR i_read_edge2;
+--i_read_edge <= i_read_edge1 OR i_read_edge2;
 
 o_finished <= i_finished;
+
+o_edgeTest <= i_read_edge;
 
 --look at rowCount to see which buffer we are using. If rowCount is 0 or 1, we are in front buffer,
 --if rowCount is 2 or 3, we are in back buffer.

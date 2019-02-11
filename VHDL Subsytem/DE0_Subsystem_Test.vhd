@@ -29,7 +29,8 @@ PORT(
 	o_valid_frame : OUT STD_LOGIC;
 	o_valid_pixel : OUT STD_LOGIC;
 	o_sobel_en    : OUT STD_LOGIC;
-	o_finished    : OUT STD_LOGIC
+	o_finished    : OUT STD_LOGIC;
+	o_edgeTest    : OUT STD_LOGIC
 );
 END DE0_Subsystem_Test;
  
@@ -40,6 +41,8 @@ ARCHITECTURE structural OF DE0_Subsystem_Test IS
 SIGNAL enable_wire  : STD_LOGIC;
 SIGNAL test_wire    : STD_LOGIC_VECTOR(11 DOWNTO 0);
 SIGNAL test_pix_cnt : INTEGER := 0;
+SIGNAL i_clkTap : STD_LOGIC;
+SIGNAL sobelWaste : STD_LOGIC;
 --=======================================
 -- Declare Components
 --=======================================
@@ -55,7 +58,8 @@ PORT(
 	o_valid_frame      : OUT STD_LOGIC;
 	o_valid_pixel      : OUT STD_LOGIC;
 	o_sobel_en         : OUT STD_LOGIC;
-	o_finished         : OUT STD_LOGIC
+	o_finished         : OUT STD_LOGIC;
+	o_edgeTest         : OUT STD_LOGIC
 ); 
 END COMPONENT;
 COMPONENT camera_programmer IS
@@ -81,7 +85,7 @@ BEGIN
 ----------========================================
 CameraCT: CameraCollectorTransmitter
 PORT MAP(
-	i_clk          => i_clk,
+	i_clk          => i_clkTap,
 	i_en           => enable_wire,
 	i_pixel_data   => test_wire,
 	i_lval         => i_lval,
@@ -90,8 +94,9 @@ PORT MAP(
 	o_pixel_data   => o_pixel_data,
 	o_valid_frame  => o_valid_frame,
 	o_valid_pixel  => o_valid_pixel,
-	o_sobel_en     => o_sobel_en,
-	o_finished     => o_finished
+	o_sobel_en     => sobelWaste,
+	o_finished     => o_finished,
+	o_edgeTest     => o_edgeTest
 );
 CameraP: camera_programmer
 PORT MAP(
@@ -125,4 +130,6 @@ BEGIN
 		END IF;
 	END IF;
 END PROCESS;
+i_clkTap <= i_clk;
+o_sobel_en <= i_clkTap;
 END structural;
