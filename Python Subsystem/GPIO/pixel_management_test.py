@@ -1,7 +1,7 @@
 import numpy as np
 from time import sleep
 import cv2
-
+import imutils
 
 def inputConversion(channel):
     if channel:
@@ -28,33 +28,31 @@ def pixelEnqueue(pixelQueue, stableQueue, finishedQueue, sendQueue):
                 finishedQueue.put('1')
                 xIter += 1
             yIter += 1
-        if sendQueue.qsize() < 4:
-            sendQueue.put(pixelList, 2)
-        else:
-            for i in range(sendQueue.qsize()):
-                sendQueue.get(False)
-            sendQueue.put(pixelList, 2)
+
+        for i in range(sendQueue.qsize()):
+            sendQueue.get(False)
+        sendQueue.put(pixelList, 2)
 
 
 def picSender(pixelQueue, stableQueue, finishedQueue):
-    nothing_gesture = True
+    camera = cv2.VideoCapture(0)
     sleep(1)
     while 1:
             print("Perform Gesture.")
             sleep(2)
             print("Gesture Captured")
-            if nothing_gesture:
-                img = cv2.imread("nothing.png", 0)
-                nothing_gesture = False
-            else:
-                img = cv2.imread("pictosend.png", 0)
-                nothing_gesture = True
 
+            ret, image = camera.read()
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            image = cv2.flip(image,0)
+            image = cv2.flip(image,1)
+            image = cv2.resize(image,(64,64))
+            cv2.imwrite("test.png",image)
             i = 0
             while i < 64:
                 j = 0
                 while j < 64:
-                    graypix = img[i, j]
+                    graypix = image[i, j]
                     finishedQueue.get()
                     pixelQueue.put(graypix)
                     stableQueue.put('1')

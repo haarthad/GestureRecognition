@@ -8,7 +8,7 @@ def main():
     pixelQueue = Queue()
     stableQueue = Queue()
     finishedQueue = Queue()
-    sendQueue = Queue(5)
+    sendQueue = Queue(1)
     p1 = Process(target=pm.pixelEnqueue, args=(pixelQueue, stableQueue, finishedQueue, sendQueue))
     p2 = Process(target=pm.picSender, args=(pixelQueue, stableQueue, finishedQueue))
     p3 = Process(target=ir.runRecognition,
