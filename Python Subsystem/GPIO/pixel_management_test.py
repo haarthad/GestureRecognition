@@ -14,10 +14,10 @@ def pixelEnqueue(pixelQueue, stableQueue, finishedQueue, sendQueue):
     # Initialize the list with the right amount of pixel data.
     # In the future this will be modified to be a list of lists.
     # The overall list will be the number of pixels, and then each sublist is 8 large.
+    finishedQueue.put('1')
     while 1:
         pixelList = np.zeros([240, 320])
         yIter = 0
-        finishedQueue.put('1')
         # For testing purposes run in a loop.
         while yIter < 240:
             xIter = 0
@@ -50,7 +50,8 @@ def picSender(pixelQueue, stableQueue, finishedQueue):
                     graypix = img[i,j]
                     finishedQueue.get()
                     pixelQueue.put(graypix)
-                    stableQueue.put('1')
+                    if j != 319 or i != 239:
+                        stableQueue.put('1')
                     j += 1
                 i += 1
 
