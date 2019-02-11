@@ -54,11 +54,10 @@ def picSender(pixelQueue, stableQueue, finishedQueue):
             while i < 240:
                 j = 0
                 while j < 320:
-                    graypix = img[i,j]
+                    graypix = img[i, j]
                     finishedQueue.get()
                     pixelQueue.put(graypix)
-                    if j != 319 or i != 239:
-                        stableQueue.put('1')
+                    stableQueue.put('1')
                     j += 1
                 i += 1
 
