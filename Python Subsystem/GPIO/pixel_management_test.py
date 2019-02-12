@@ -1,7 +1,6 @@
 import numpy as np
 from time import sleep
 import cv2
-import imutils
 
 def inputConversion(channel):
     if channel:
@@ -39,15 +38,17 @@ def picSender(pixelQueue, stableQueue, finishedQueue):
     sleep(1)
     while 1:
             print("Perform Gesture.")
-            sleep(2)
+            sleep(5)
             print("Gesture Captured")
+            # Get most recent image in video buffer
+            # This is done due to the slow execution on the pi
+            for i in range(10):
+                ret, image = camera.read()
 
-            ret, image = camera.read()
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             image = cv2.flip(image,0)
             image = cv2.flip(image,1)
             image = cv2.resize(image,(64,64))
-            cv2.imwrite("test.png",image)
             i = 0
             while i < 64:
                 j = 0

@@ -2,8 +2,8 @@ import sys, time
 import pygame
 
 def Timer(commands_path):
-    sec = 0
-    min = 1
+    sec = 30
+    min = 0
     looper = True
     while looper:
         print("\r%02d:%02d" % (min, sec), flush=True, end='')
