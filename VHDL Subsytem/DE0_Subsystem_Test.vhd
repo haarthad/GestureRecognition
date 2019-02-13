@@ -108,32 +108,54 @@ PORT MAP(
 	O_SDATA     => o_sdata,
 	O_PROG_DONE => enable_wire
 );
---generate the test pixel data
+
+--generate horizontal strip test pixel data
 PROCESS(i_clk)
 BEGIN
 	IF(RISING_EDGE(i_clk)) THEN
 		IF(i_fval = '1') THEN
 			IF(i_lval = '1') THEN
-				IF(test_pix_cnt < 640) THEN
+				IF(test_pix_cnt < 2560) THEN
 					test_wire <= "111111111111";
 					test_pix_cnt <= test_pix_cnt + 1;
 				ELSE
 					test_wire <= "000000000000";
 					test_pix_cnt <= test_pix_cnt;
 				END IF;
---				test_pix_cnt <= test_pix_cnt + 1;
 			ELSE
 				test_pix_cnt <= test_pix_cnt;
 				test_wire <= test_wire;
 			END IF;
---			test_wire <= "111111111111";
 		ELSE
-			--test_pix_cnt <= 0;
 			test_wire <= "000000000000";
 			test_pix_cnt <= 0;
 		END IF;
 	END IF;
 END PROCESS;
+
+--generate vertical strip test pixel data
+--PROCESS(i_clk)
+--BEGIN
+--	IF(RISING_EDGE(i_clk)) THEN
+--		IF(i_fval = '1') THEN
+--			IF(i_lval = '1') THEN
+--				IF(test_pix_cnt < 10) THEN
+--					test_wire <= "111111111111";
+--				ELSE
+--					test_wire <= "000000000000";
+--				END IF;
+--				test_pix_cnt <= test_pix_cnt + 1;
+--			ELSE
+--				test_pix_cnt <= 0;
+--				test_wire <= test_wire;
+--			END IF;
+--		ELSE
+--			test_wire <= "000000000000";
+--			test_pix_cnt <= 0;
+--		END IF;
+--	END IF;
+--END PROCESS;
+
 i_clkTap <= i_clk;
 o_sobel_en <= i_clkTap;
 END structural;

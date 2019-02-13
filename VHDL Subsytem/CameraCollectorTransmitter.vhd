@@ -100,7 +100,6 @@ SIGNAL pixelCount        : INTEGER := 0; --\/
 SIGNAL rowCount          : INTEGER := 0; --\/
 SIGNAL write_en_wire     : STD_LOGIC; --\/
 SIGNAL write_select_wire : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0) := (OTHERS => '0'); --\/
-SIGNAL write_data_wire   : STD_LOGIC_VECTOR(PIXEL_WIDTH - 1 DOWNTO 0); --\/
 SIGNAL selectA_wire      : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0) := (OTHERS => '0'); --\/
 SIGNAL selectB_wire      : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0) := (OTHERS => '0'); --\/
 SIGNAL selectC_wire      : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0) := (OTHERS => '0'); --\/
@@ -122,6 +121,7 @@ SIGNAL i_read_delayed    : STD_LOGIC := '0';
 SIGNAL i_read_edge       : STD_LOGIC := '0';
 SIGNAL i_read_edge1      : STD_LOGIC := '0';
 SIGNAL i_read_edge2      : STD_LOGIC := '0';
+SIGNAL write_select_wire_delayed : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0) := (OTHERS => '0');
 
 BEGIN
 --========================================
@@ -134,7 +134,7 @@ buffers: RAM_1_4_12
 PORT MAP(
 	i_clk          => i_clk,
 	i_write_en     => write_en_wire,
-	i_write_select => write_select_wire,
+	i_write_select => write_select_wire_delayed,
 	i_write_data   => i_pixel_data,
 	i_selectA      => selectA_wire, 
 	i_selectB      => selectB_wire,
@@ -235,14 +235,16 @@ BEGIN
 		rowCount     <= 0;
 		write_en_wire <= '0';
 		write_select_wire <= (OTHERS => '0');
+		write_select_wire_delayed <= (OTHERS => '0');
 		i_swapped_wire <= '0';
 	ELSIF(RISING_EDGE(i_clk)) THEN
 		IF(pstate = COLLECT) THEN
+			write_select_wire_delayed <= write_select_wire;
 			IF(i_lval = '1') THEN
 				write_en_wire <= '1';
 				pixelCount    <= pixelCount + 1;
 				--increment the write address of the front/back buffer
-				IF(UNSIGNED(write_select_wire) < ((PICTURE_WIDTH * 4) - 1)) THEN -- was IF(UNSIGNED(write_select_wire) < ((PICTURE_WIDTH * 4) - 1)) THEN
+				IF(UNSIGNED(write_select_wire) < ((PICTURE_WIDTH * 4) - 1)) THEN
 					write_select_wire <= STD_LOGIC_VECTOR(UNSIGNED(write_select_wire) + 1 );
 					IF(UNSIGNED(write_select_wire) = ((PICTURE_WIDTH * 2) - 1)) THEN
 						i_swapped_wire <= '1';

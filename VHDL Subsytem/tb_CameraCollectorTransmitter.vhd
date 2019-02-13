@@ -116,7 +116,7 @@ BEGIN
 				i_lval <= '0';
 			END IF;
 			
-			IF(total_sent < 640) THEN
+			IF(total_sent < 2560) THEN
 				pixel_gen <= "111111111111"; 
 			ELSE
 				pixel_gen <= "000000000000";
