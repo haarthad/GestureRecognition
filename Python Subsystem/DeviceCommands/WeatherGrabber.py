@@ -15,12 +15,12 @@ def getLoc():
 def getWeatherString():
     weather = Weather(Unit.FAHRENHEIT)
     latlon = getLoc()
-#    try:
-    lookup = weather.lookup_by_latlng(latlon[0], latlon[1])
-    condition = lookup.condition
-    print(condition.text + ',' + condition.temp + "F")
-#    except requests.exceptions.ConnectionError:
-#        print("Weather API connection refused")
+    try:
+        lookup = weather.lookup_by_latlng(latlon[0], latlon[1])
+        condition = lookup.condition
+        print(condition.text + ',' + condition.temp + "F")
+    except requests.exceptions.ConnectionError:
+        print("Weather API connection refused")
 
 
 def main():

@@ -2,7 +2,6 @@ import numpy as np
 from time import sleep
 import cv2
 
-
 def inputConversion(channel):
     if channel:
         return 1
@@ -16,45 +15,45 @@ def pixelEnqueue(pixelQueue, stableQueue, finishedQueue, sendQueue):
     # The overall list will be the number of pixels, and then each sublist is 8 large.
     finishedQueue.put('1')
     while 1:
-        pixelList = np.zeros([240, 320])
+        pixelList = np.zeros([64, 64])
         yIter = 0
         # For testing purposes run in a loop.
-        while yIter < 240:
+        while yIter < 64:
             xIter = 0
-            while xIter < 320:
+            while xIter < 64:
                 stableQueue.get()
                 pix = pixelQueue.get()
                 pixelList[yIter, xIter] = pix
                 finishedQueue.put('1')
                 xIter += 1
             yIter += 1
-        if sendQueue.qsize() < 4:
-            sendQueue.put(pixelList, 2)
-        else:
-            for i in range(sendQueue.qsize()):
-                sendQueue.get(False)
-            sendQueue.put(pixelList, 2)
+
+        for i in range(sendQueue.qsize()):
+            sendQueue.get(False)
+        sendQueue.put(pixelList, 2)
 
 
 def picSender(pixelQueue, stableQueue, finishedQueue):
-    nothing_gesture = True
+    camera = cv2.VideoCapture(0)
     sleep(1)
     while 1:
             print("Perform Gesture.")
-            sleep(2)
+            sleep(5)
             print("Gesture Captured")
-            if nothing_gesture:
-                img = cv2.imread("nothing.png", 0)
-                nothing_gesture = False
-            else:
-                img = cv2.imread("pictosend.png", 0)
-                nothing_gesture = True
+            # Get most recent image in video buffer
+            # This is done due to the slow execution on the pi
+            for i in range(10):
+                ret, image = camera.read()
 
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            image = cv2.flip(image,0)
+            image = cv2.flip(image,1)
+            image = cv2.resize(image,(64,64))
             i = 0
-            while i < 240:
+            while i < 64:
                 j = 0
-                while j < 320:
-                    graypix = img[i, j]
+                while j < 64:
+                    graypix = image[i, j]
                     finishedQueue.get()
                     pixelQueue.put(graypix)
                     stableQueue.put('1')

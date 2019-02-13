@@ -1,3 +1,25 @@
+###############################################################################
+# This file creates a CNN model, saved in the SavedModels folder, with training
+# images found in the ImageData/Training folder. It runs the images through
+# a complex TensorFlow model consisting of Convolution layers and Neural
+# Network layers to reach a high prediction accuracy of 94-97%. The model
+# works best with using a simple solid white or black background.
+#
+# Ideas the follow article were used for loading in images from a folder,
+# creating a CNN model, and other miscellaneous methods:
+# https://blog.francium.tech/build-your-own-image-classifier-with-tensorflow-
+# and-keras-dc147a15e38e
+#
+# Ideas from TensorFlow's basic classification were preprocessing the data,
+# setting up model layers and configurations, and different ways to plot the
+# images:
+# https://www.tensorflow.org/tutorials/keras/basic_classification
+#
+# Images in the training and test folder were gathered from the Jochen Triesch
+# Static Hand Posture Database and the Sebastien Marcel Static Hand Posture
+# Database based at http://www.idiap.ch/resource/gestures/
+###############################################################################
+
 import cv2
 import numpy as np
 import os
@@ -20,6 +42,7 @@ Y_OF_IMAGES =        64
 NUMBER_OF_EPOCHS =   20
 NUMBER_OF_GESTURES = 6
 BATCH_SIZE =         50
+WHITE_COLOR =        255.0
 
 # Transformation matrices
 matrix_rotate_right = cv2.getRotationMatrix2D((X_OF_IMAGES / 2, Y_OF_IMAGES / 2),
@@ -46,6 +69,8 @@ def selectLabel(image):
     gesture = image[0]
     label = np.array([0, 0, 0, 0, 0, 0])
 
+    # Return correct label based on which gesture the image is
+    # N is for Nothing
     if gesture == 'A':
         label = np.array([1, 0, 0, 0, 0, 0])
     elif gesture == 'B':
@@ -59,6 +84,7 @@ def selectLabel(image):
     elif gesture == 'N':
         label = np.array([0, 0, 0, 0, 0, 1])
     return label
+
 
 """
 Perform sobel, noise, rotation, and translation transformations on the
@@ -78,12 +104,12 @@ def imageTransformation(image,path):
     dy = nd.sobel(image, 0)
     # Combine the two directions into one image
     sobeled_image = np.hypot(dx, dy)
-    sobeled_image *= 255.0 / np.max(sobeled_image)
+    sobeled_image *= WHITE_COLOR / np.max(sobeled_image)
     # Repeat for noisy image
     dxn = nd.sobel(noisy_image, 1)
     dyn = nd.sobel(noisy_image, 0)
     sobeled_noisy_image = np.hypot(dxn, dyn)
-    sobeled_noisy_image *= 255.0 / np.max(sobeled_noisy_image)
+    sobeled_noisy_image *= WHITE_COLOR / np.max(sobeled_noisy_image)
 
     # Apply 30/-30 degree rotation to both images
     image_rotated_right =       cv2.warpAffine(sobeled_image,
@@ -144,6 +170,7 @@ def imageTransformation(image,path):
 
     return images
 
+
 """
 Reads in all training images, and returns them as TensorFlow images with
 labels attached.
@@ -155,10 +182,12 @@ def loadTrainingData():
         path = os.path.join(TRAINING_DATA, i)
         image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
         image = cv2.resize(image, (X_OF_IMAGES, Y_OF_IMAGES))
+        # Apply multiple data augmentations to the image
         train_images.extend(imageTransformation(image,i))
 
     shuffle(train_images)
     return train_images
+
 
 """
 Reads in all testing images, and returns them as TensorFlow images with
@@ -172,15 +201,18 @@ def loadTestingData():
         image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
         image = cv2.resize(image, (X_OF_IMAGES, Y_OF_IMAGES))
 
+        # Apply sobel filter
         image = image.astype('int32')
         dx = nd.sobel(image, 1)
         dy = nd.sobel(image, 0)
         mag = np.hypot(dx, dy)
-        mag *= 255.0 / np.max(mag)
+        mag *= WHITE_COLOR / np.max(mag)
 
         test_images.append([np.array(mag), selectLabel(i)])
+
     shuffle(test_images)
     return test_images
+
 
 """
 Reads in all personal testing images, and returns them as TensorFlow images
@@ -194,13 +226,15 @@ def loadPersonalTestingData():
         image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
         image = cv2.resize(image, (X_OF_IMAGES, Y_OF_IMAGES))
 
+        # Apply sobel filter
         image = image.astype('int32')
         dx = nd.sobel(image, 1)
         dy = nd.sobel(image, 0)
         mag = np.hypot(dx, dy)
-        mag *= 255.0 / np.max(mag)
+        mag *= WHITE_COLOR / np.max(mag)
 
         personal_test_images.append([np.array(mag), selectLabel(i)])
+
     shuffle(personal_test_images)
     return personal_test_images
 
@@ -233,6 +267,7 @@ def plotImage(i, predictions_array, true_label, img):
                                 GESTURE_NAMES[true_label]),
                                 color=color)
 
+
 """
 Plots the gesture prediction percentages next to the image.
 :param i: Iteration number in array of images
@@ -257,7 +292,7 @@ def plotValueArray(i, predictions_array, true_label):
 """
 Takes in a list of images, reshapes them to work with the convolution layers,
 applies a label to each image, and changes the value to be between 0 and 1.
-:param List of images
+:param image_list List of images
 :return Reshaped images and their labels
 """
 def processImages(image_list):
@@ -267,7 +302,7 @@ def processImages(image_list):
     labels = np.array([i[1] for i in image_list])
 
     # Preprocess all images so the values for each images fall between 0 and 1
-    images = images / 255.0
+    images = images / WHITE_COLOR
 
     return images, labels
 
@@ -279,12 +314,14 @@ def setupModel():
     # Set parameters and layers for the model
     model = keras.models.Sequential([
         keras.layers.InputLayer(input_shape=(X_OF_IMAGES,Y_OF_IMAGES,1)),
+        # 2D convolution layer
         keras.layers.Conv2D(filters=32,
                             kernel_size=5,
                             strides=1,
                             padding='same',
                             activation='relu',
                             input_shape=(X_OF_IMAGES,Y_OF_IMAGES,1)),
+        # Max pooling operation for spatial data
         keras.layers.MaxPool2D(pool_size=5,
                                padding='same'),
         keras.layers.Conv2D(filters=64,
@@ -301,8 +338,10 @@ def setupModel():
                             activation='relu'),
         keras.layers.MaxPool2D(pool_size=5,
                                padding='same'),
+        # Fraction of the input units to drop, helps prevent overfitting
         keras.layers.Dropout(0.25),
-        keras.layers.Flatten(input_shape=(64,64)),
+        keras.layers.Flatten(input_shape=(X_OF_IMAGES,Y_OF_IMAGES)),
+        # Regular densely-connected NN layer
         keras.layers.Dense(256, activation=tf.nn.relu),
         keras.layers.Dropout(0.5),
         keras.layers.Dense(NUMBER_OF_GESTURES, activation=tf.nn.softmax),
@@ -327,7 +366,7 @@ def printAccuracyGraph(model, images, labels, image_list):
     # Get category percentages for all test images
     predictions = model.predict(images)
 
-    # Print the first 25 images, and their predicted values for each category
+    # Print the first 72 images, and their predicted values for each category
     # Uncomment plt.show to see the plot
     num_rows = 9
     num_cols = 8
