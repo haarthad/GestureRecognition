@@ -6,7 +6,7 @@ from weather import Weather, Unit
 def getLoc():
     send_url = 'http://ipinfo.io/json'
     r = requests.get(send_url)
-    j = json.loads(r.content)
+    j = json.loads(r.content.decode('utf-8'))
     loc = j['loc']
     latlon = [x.strip() for x in loc.split(',')]
     return latlon
