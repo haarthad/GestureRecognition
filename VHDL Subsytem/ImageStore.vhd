@@ -142,8 +142,6 @@ BEGIN
    END CASE;
 END PROCESS;
 
---grab a pixel if in COLLECT state and increment pixel count.
---also increments row count
 PROCESS(i_clk, i_finished)
 BEGIN
 	IF(i_finished = '1') THEN

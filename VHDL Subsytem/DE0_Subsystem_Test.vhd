@@ -114,19 +114,23 @@ BEGIN
 	IF(RISING_EDGE(i_clk)) THEN
 		IF(i_fval = '1') THEN
 			IF(i_lval = '1') THEN
-				IF(test_pix_cnt = 10) THEN
+				IF(test_pix_cnt < 640) THEN
 					test_wire <= "111111111111";
+					test_pix_cnt <= test_pix_cnt + 1;
 				ELSE
 					test_wire <= "000000000000";
+					test_pix_cnt <= test_pix_cnt;
 				END IF;
-				test_pix_cnt <= test_pix_cnt + 1;
+--				test_pix_cnt <= test_pix_cnt + 1;
 			ELSE
-				test_pix_cnt <= 0;
-				test_wire <= "000000000000";
+				test_pix_cnt <= test_pix_cnt;
+				test_wire <= test_wire;
 			END IF;
+--			test_wire <= "111111111111";
 		ELSE
-			test_pix_cnt <= 0;
+			--test_pix_cnt <= 0;
 			test_wire <= "000000000000";
+			test_pix_cnt <= 0;
 		END IF;
 	END IF;
 END PROCESS;

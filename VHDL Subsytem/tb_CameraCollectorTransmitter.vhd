@@ -116,10 +116,10 @@ BEGIN
 				i_lval <= '0';
 			END IF;
 			
-			IF(pixel_gen = "111111111111") THEN
-				pixel_gen <= "000000000000"; 
+			IF(total_sent < 640) THEN
+				pixel_gen <= "111111111111"; 
 			ELSE
-				pixel_gen <= STD_LOGIC_VECTOR(UNSIGNED(pixel_gen)+1);
+				pixel_gen <= "000000000000";
 			END IF;
 		END IF;
 	END IF;
