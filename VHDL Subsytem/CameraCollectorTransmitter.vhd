@@ -43,7 +43,6 @@ PORT(
 	o_valid_frame      : OUT STD_LOGIC := '0';
 	o_valid_pixel      : OUT STD_LOGIC := '0';
 	o_sobel_en         : OUT STD_LOGIC := '0';
-	o_finished         : OUT STD_LOGIC := '0';
 	o_edgeTest         : OUT STD_LOGIC
 );
 END CameraCollectorTransmitter;
@@ -122,6 +121,8 @@ SIGNAL i_read_edge       : STD_LOGIC := '0';
 SIGNAL i_read_edge1      : STD_LOGIC := '0';
 SIGNAL i_read_edge2      : STD_LOGIC := '0';
 SIGNAL write_select_wire_delayed : STD_LOGIC_VECTOR(REG_NUM_BIN - 1 DOWNTO 0) := (OTHERS => '0');
+SIGNAL send_count_delay1 : INTEGER := 0;
+SIGNAL send_count_delay2 : INTEGER := 0;
 
 BEGIN
 --========================================
@@ -204,7 +205,7 @@ BEGIN
       WHEN COLLECT =>
          IF (i_finished = '1') THEN
             nstate <= RESTART;
-			ELSIF (pixelCount = 307200) THEN
+			ELSIF (pixelCount = PICTURE_HEIGHT * PICTURE_WIDTH) THEN
 				nstate <= AWAIT_FINISH;
 			ELSE
 				nstate <= COLLECT;
@@ -290,7 +291,7 @@ BEGIN
 		o_valid_pixel <= '0';
 		o_valid_frame <= '0';
 		transmit_delay <= 0;
-		send_count <= 0; --PROBLEM?
+		send_count <= 0;
 	ELSIF(RISING_EDGE(i_clk)) THEN
 		IF(pstate = AWAIT_FINISH) THEN
 			o_valid_frame <= '1';
@@ -326,7 +327,9 @@ selectSram_wire <= STD_LOGIC_VECTOR(TO_UNSIGNED(send_count, selectSram_wire'LENG
 PROCESS(i_clk)
 BEGIN
 	IF(RISING_EDGE(i_clk)) THEN
-		IF(send_count < TRANSMIT_NUMBER - 1) THEN
+		send_count_delay1 <= send_count;
+		send_count_delay2 <= send_count_delay1;
+		IF(send_count_delay2 < TRANSMIT_NUMBER - 1) THEN
 			i_finished <= '0';
 		ELSE
 			i_finished <= '1';
@@ -356,8 +359,6 @@ i_read_edge1 <= i_pixel_read AND NOT i_read_delayed;
 i_read_edge2 <= i_read_delayed AND NOT i_pixel_read;
 --i_pixel_read double edge detection
 --i_read_edge <= i_read_edge1 OR i_read_edge2;
-
-o_finished <= i_finished;
 
 o_edgeTest <= i_read_edge;
 

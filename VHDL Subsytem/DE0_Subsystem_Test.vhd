@@ -29,7 +29,6 @@ PORT(
 	o_valid_frame : OUT STD_LOGIC;
 	o_valid_pixel : OUT STD_LOGIC;
 	o_sobel_en    : OUT STD_LOGIC;
-	o_finished    : OUT STD_LOGIC;
 	o_edgeTest    : OUT STD_LOGIC
 );
 END DE0_Subsystem_Test;
@@ -58,7 +57,6 @@ PORT(
 	o_valid_frame      : OUT STD_LOGIC;
 	o_valid_pixel      : OUT STD_LOGIC;
 	o_sobel_en         : OUT STD_LOGIC;
-	o_finished         : OUT STD_LOGIC;
 	o_edgeTest         : OUT STD_LOGIC
 ); 
 END COMPONENT;
@@ -95,7 +93,6 @@ PORT MAP(
 	o_valid_frame  => o_valid_frame,
 	o_valid_pixel  => o_valid_pixel,
 	o_sobel_en     => sobelWaste,
-	o_finished     => o_finished,
 	o_edgeTest     => o_edgeTest
 );
 CameraP: camera_programmer
@@ -110,43 +107,20 @@ PORT MAP(
 );
 
 --generate horizontal strip test pixel data
-PROCESS(i_clk)
-BEGIN
-	IF(RISING_EDGE(i_clk)) THEN
-		IF(i_fval = '1') THEN
-			IF(i_lval = '1') THEN
-				IF(test_pix_cnt < 2560) THEN
-					test_wire <= "111111111111";
-					test_pix_cnt <= test_pix_cnt + 1;
-				ELSE
-					test_wire <= "000000000000";
-					test_pix_cnt <= test_pix_cnt;
-				END IF;
-			ELSE
-				test_pix_cnt <= test_pix_cnt;
-				test_wire <= test_wire;
-			END IF;
-		ELSE
-			test_wire <= "000000000000";
-			test_pix_cnt <= 0;
-		END IF;
-	END IF;
-END PROCESS;
-
---generate vertical strip test pixel data
 --PROCESS(i_clk)
 --BEGIN
 --	IF(RISING_EDGE(i_clk)) THEN
 --		IF(i_fval = '1') THEN
 --			IF(i_lval = '1') THEN
---				IF(test_pix_cnt < 10) THEN
+--				IF(test_pix_cnt < 2560) THEN
 --					test_wire <= "111111111111";
+--					test_pix_cnt <= test_pix_cnt + 1;
 --				ELSE
 --					test_wire <= "000000000000";
+--					test_pix_cnt <= test_pix_cnt;
 --				END IF;
---				test_pix_cnt <= test_pix_cnt + 1;
 --			ELSE
---				test_pix_cnt <= 0;
+--				test_pix_cnt <= test_pix_cnt;
 --				test_wire <= test_wire;
 --			END IF;
 --		ELSE
@@ -155,6 +129,29 @@ END PROCESS;
 --		END IF;
 --	END IF;
 --END PROCESS;
+
+--generate vertical strip test pixel data
+PROCESS(i_clk)
+BEGIN
+	IF(RISING_EDGE(i_clk)) THEN
+		IF(i_fval = '1') THEN
+			IF(i_lval = '1') THEN
+				IF(test_pix_cnt < 10) THEN
+					test_wire <= "111111111111";
+				ELSE
+					test_wire <= "000000000000";
+				END IF;
+				test_pix_cnt <= test_pix_cnt + 1;
+			ELSE
+				test_pix_cnt <= 0;
+				test_wire <= test_wire;
+			END IF;
+		ELSE
+			test_wire <= "000000000000";
+			test_pix_cnt <= 0;
+		END IF;
+	END IF;
+END PROCESS;
 
 i_clkTap <= i_clk;
 o_sobel_en <= i_clkTap;

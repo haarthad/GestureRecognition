@@ -11,6 +11,8 @@ package CAMERA_PACK is
 	--=======================================
 	--camera frame is 640x480
 	CONSTANT PICTURE_WIDTH : INTEGER := 640; 
+	--camera frame is 640x480
+	CONSTANT PICTURE_HEIGHT : INTEGER := 480; 
 	--the number of bits required to store 640*4 as a binary number
 	CONSTANT REG_NUM_BIN : INTEGER := 12;
 	--the width of a pixel
@@ -26,5 +28,3 @@ package CAMERA_PACK is
 	--how many pixels to send from SRAM during transmission
 	CONSTANT TRANSMIT_NUMBER : INTEGER :=  GREYSCALE_PICTURE_WIDTH * GREYSCALE_PICTURE_HEIGHT;
 end CAMERA_PACK;
-
---78

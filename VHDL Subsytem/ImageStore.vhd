@@ -80,6 +80,8 @@ SIGNAL i_regA_math       : STD_LOGIC_VECTOR(PIXEL_WIDTH + 1 DOWNTO 0);
 SIGNAL i_regB_math       : STD_LOGIC_VECTOR(PIXEL_WIDTH + 1 DOWNTO 0);
 SIGNAL i_regC_math       : STD_LOGIC_VECTOR(PIXEL_WIDTH + 1 DOWNTO 0);
 SIGNAL i_regD_math       : STD_LOGIC_VECTOR(PIXEL_WIDTH + 1 DOWNTO 0);
+SIGNAL greyscaleTemp1    : STD_LOGIC_VECTOR(13 DOWNTO 0);
+SIGNAL greyscaleTemp2    : STD_LOGIC_VECTOR(13 DOWNTO 0);
 --========================================
 -- Local Architecture
 --========================================
@@ -159,9 +161,13 @@ BEGIN
 		IF(pstate = DRAIN_FRONT) THEN
 			--grab four Bayer pattern pixels and convert them to a single greyscale pixel
 			--it looks nasty, but there are just a lot of type conversions
-			greyscaleTemp <= STD_LOGIC_VECTOR(UNSIGNED((((UNSIGNED(i_regA_math) + UNSIGNED(i_regD_math))/2)+UNSIGNED(i_regB_math)+UNSIGNED(i_regC_math))/3));
+			greyscaleTemp <= greyscaleTemp1(11 DOWNTO 0);
 			IF(sramIndex < (TRANSMIT_NUMBER - 1)) THEN
-				sramIndex <= sramIndex + 1;
+				IF(regB < PICTURE_WIDTH - 1) THEN 
+					sramIndex <= sramIndex + 1;
+				ELSE
+					sramIndex <= sramIndex;
+				END IF;
 			ELSE
 				sramIndex <= sramIndex;
 			END IF;
@@ -183,10 +189,15 @@ BEGIN
 		ELSIF(pstate = DRAIN_BACK) THEN
 			--grab four Bayer pattern pixels and convert them to a single greyscale pixel
 			--it looks nasty, but there are just a lot of type conversions
-			greyscaleTemp <= STD_LOGIC_VECTOR(UNSIGNED((((UNSIGNED(i_regA_math) + UNSIGNED(i_regD_math))/2)+UNSIGNED(i_regB_math)+UNSIGNED(i_regC_math))/3));
+			greyscaleTemp <= greyscaleTemp2(11 DOWNTO 0);
 			IF(sramIndex < (TRANSMIT_NUMBER - 1)) THEN
-				sramIndex <= sramIndex + 1;
-			ELSE sramIndex <= sramIndex;
+				IF(regB < (PICTURE_WIDTH * 3) - 1) THEN 
+					sramIndex <= sramIndex + 1;
+				ELSE
+					sramIndex <= sramIndex;
+				END IF;
+			ELSE 
+				sramIndex <= sramIndex;
 			END IF;
 			IF(regB < (PICTURE_WIDTH * 3) - 1) THEN 
 				regA <= regA + 2;
@@ -221,5 +232,8 @@ i_regA_math <= "00" & i_regA;
 i_regB_math <= "00" & i_regB;
 i_regC_math <= "00" & i_regC;
 i_regD_math <= "00" & i_regD;
+
+greyscaleTemp1 <= STD_LOGIC_VECTOR(UNSIGNED((((UNSIGNED(i_regA_math) + UNSIGNED(i_regD_math))/2)+UNSIGNED(i_regB_math)+UNSIGNED(i_regC_math))/3));
+greyscaleTemp2 <= STD_LOGIC_VECTOR(UNSIGNED((((UNSIGNED(i_regA_math) + UNSIGNED(i_regD_math))/2)+UNSIGNED(i_regB_math)+UNSIGNED(i_regC_math))/3));
 
 END structural;
