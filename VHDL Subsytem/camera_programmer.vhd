@@ -50,39 +50,24 @@ component CLOCK_DIVIDER is port(
 signal RST_EN  : std_logic := '0';
 signal RST_CNT : integer range 0 to 20 := 0;
 
---Program signal declarations
---Control bits                                        BHHE
-constant START_BIT : std_logic_vector(3 downto 0) := "1100"; -- Falling edge during clock cycle
-constant STOP_BIT  : std_logic_vector(3 downto 0) := "0010"; -- Rising edge during clock cycle
-constant ACK_BIT   : std_logic_vector(3 downto 0) := "0000"; -- Acknowledge, blank
-constant WRITE_BIT : std_logic_vector(3 downto 0) := "0000"; -- Place after address
-constant READ_BIT  : std_logic_vector(3 downto 0) := "1110"; -- Place after address
---Register address bits                                   BH1L1H2L2H3L3H4L4H5L5H6L6H7E
-constant REG_ROW_SIZE : std_logic_vector(27 downto 0) := "0000000000000000000011101110"; -- 0x03
-constant REG_COL_SIZE : std_logic_vector(27 downto 0) := "0000000000000000111000000000"; -- 0x04
-constant REG_ROW_SKIP : std_logic_vector(27 downto 0) := "0000111000000000000011100000"; -- 0x22
-constant REG_COL_SKIP : std_logic_vector(27 downto 0) := "0000111000000000000011101110"; -- 0x23
---Register control bits                                   BH1L1H2L2H3L3H4L4H5L5H6L6H7L7H8E
-constant ROW_SIZE_MSB : std_logic_vector(31 downto 0) := "00000000000000000000111011101110"; -- 0x07
-constant ROW_SIZE_LSB : std_logic_vector(31 downto 0) := "00001110111011101110111011101110"; -- 0x7F
-constant COL_SIZE_MSB : std_logic_vector(31 downto 0) := "00000000000000001110000000001110"; -- 0x09
-constant COL_SIZE_LSB : std_logic_vector(31 downto 0) := "11101110111011101110111011101110"; -- 0xFF
-constant ROW_SKIP_MSB : std_logic_vector(31 downto 0) := "00000000000000000000000000000000"; -- 0x00
-constant ROW_SKIP_LSB : std_logic_vector(31 downto 0) := "00000000000000000000000011101110"; -- 0x03
-constant COL_SKIP_MSB : std_logic_vector(31 downto 0) := "00000000000000000000000000000000"; -- 0x00
-constant COL_SKIP_LSB : std_logic_vector(31 downto 0) := "00000000000000000000000011101110"; -- 0x03
---Padding bits                                         BHHLLHHLLHHLLHHLLHHLLHHLLHHE
-constant WAIT_BITS : std_logic_vector(27 downto 0) := "1111111111111111111111111110"; --High wait
-
 --Program message declaration
-constant MESSAGE : std_logic_vector(559 downto 0) := 
-START_BIT & REG_ROW_SIZE & WRITE_BIT & ACK_BIT & ROW_SIZE_MSB & ACK_BIT & ROW_SIZE_LSB & STOP_BIT & WAIT_BITS &
-START_BIT & REG_COL_SIZE & WRITE_BIT & ACK_BIT & COL_SIZE_MSB & ACK_BIT & COL_SIZE_LSB & STOP_BIT & WAIT_BITS &
-START_BIT & REG_ROW_SKIP & WRITE_BIT & ACK_BIT & ROW_SKIP_MSB & ACK_BIT & ROW_SKIP_LSB & STOP_BIT & WAIT_BITS &
-START_BIT & REG_COL_SKIP & WRITE_BIT & ACK_BIT & COL_SKIP_MSB & ACK_BIT & COL_SKIP_LSB & STOP_BIT & WAIT_BITS;
+constant MESSAGE : std_logic_vector(563 downto 0) := 
+"00000000000000000000000000000000011111111111100000" &
+"00000000000000000000000000000000111111111111111110" & 
+"00000000000111111111111111111111111111111111111111" & 
+"11100000000000000000000000000000001111110000000000" &
+"01111110000000111111111111111111111111111111111111" &
+"11111111111000000000111111111111111111111111000000" &
+"00011111100000000000000000001111100000000000000000" &
+"00000000000000000000000000000000000000000000000000" &
+"00000000000000000000000000000000000000000111111111" &
+"11100000000000000000000000000000000000000000000000" &
+"00000000000000000000000000000000000000000000111111" &
+"11111000000000";
 
 --Program message counter declaration
-signal MSG_CNT : integer range 0 to 559 := 558;
+signal MSG_CNT   : integer range 0 to 563 := 563;
+constant MSG_MAX : integer := 563;
 
 --Message signal declarations
 signal MSG_DONE : std_logic := '0';
@@ -139,7 +124,7 @@ PROGRAM : process (I_RST_N, I_CLK50MHZ)
 begin
 	--Reset case
 	if(I_RST_N = '0') then
-		MSG_CNT  <= 558;
+		MSG_CNT  <= MSG_MAX;
 		MSG_DONE <= '0';
 		MSG_DATA <= '1';
 	--Falling edge clock case
@@ -154,7 +139,7 @@ begin
 			
 				--Message has been transmitted
 				if(MSG_CNT = 0) then
-					MSG_CNT  <= 558;
+					MSG_CNT  <= MSG_MAX;
 					MSG_DONE <= '1';
 				--Message is still transmitting
 				else
@@ -164,14 +149,14 @@ begin
 			
 			--Message has completed transmission
 			else
-				MSG_CNT  <= 558;
+				MSG_CNT  <= MSG_MAX;
 				MSG_DONE <= '1';
 				MSG_DATA <= '1';
 			end if;
 			
 		--Reset has not completed and delay has not expired
 		else
-			MSG_CNT  <= 558;
+			MSG_CNT  <= MSG_MAX;
 			MSG_DONE <= '0';
 			MSG_DATA <= '1';
 		end if;
