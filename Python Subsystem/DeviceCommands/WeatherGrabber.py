@@ -1,8 +1,8 @@
 import sys
 import requests, json
-from weather import Weather, Unit
 
-#https://stackoverflow.com/questions/24678308/how-to-find-location-with-ip-address-in-python
+
+# https://stackoverflow.com/questions/24678308/how-to-find-location-with-ip-address-in-python
 def getLoc():
     send_url = 'http://ipinfo.io/json'
     r = requests.get(send_url)
@@ -11,20 +11,21 @@ def getLoc():
     latlon = [x.strip() for x in loc.split(',')]
     return latlon
 
-#weather API documentation : https://pypi.org/project/weather-api/
-def getWeatherString():
-    weather = Weather(Unit.FAHRENHEIT)
-    latlon = getLoc()
-    try:
-        lookup = weather.lookup_by_latlng(latlon[0], latlon[1])
-        condition = lookup.condition
-        print(condition.text + ',' + condition.temp + "F")
-    except requests.exceptions.ConnectionError:
-        print("Weather API connection refused")
-
 
 def main():
-    getWeatherString()
-	
+    latlon = getLoc()
+    base_url = 'http://api.openweathermap.org/data/2.5/weather?'
+    payload = {
+    'lat': latlon[0],
+    'lon': latlon[1],
+    'units': 'imperial',
+    'APPID': '655d0c8eef3680920a2033c87abb0472'
+    }
+    r = requests.get(base_url, params=payload)  # gets json output
+    data = r.json()
+    temp = data["main"]["temp"]
+    desc = data["weather"][0]["description"]
+    print(temp,"F", desc)
+
 if __name__ == "__main__":
     main()
