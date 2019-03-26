@@ -157,13 +157,13 @@ BEGIN
 		regC      <= PICTURE_WIDTH;
 		regD      <= PICTURE_WIDTH + 1;
 		sramIndex <= 0;
-	ELSIF(RISING_EDGE(i_clk)) THEN
+	ELSIF(FALLING_EDGE(i_clk)) THEN
 		IF(pstate = DRAIN_FRONT) THEN
 			--grab four Bayer pattern pixels and convert them to a single greyscale pixel
 			--it looks nasty, but there are just a lot of type conversions
 			greyscaleTemp <= greyscaleTemp1(11 DOWNTO 0);
 			IF(sramIndex < (TRANSMIT_NUMBER - 1)) THEN
-				IF(regB < PICTURE_WIDTH - 1) THEN 
+				IF(regB <= PICTURE_WIDTH - 1) THEN 
 					sramIndex <= sramIndex + 1;
 				ELSE
 					sramIndex <= sramIndex;
@@ -191,7 +191,7 @@ BEGIN
 			--it looks nasty, but there are just a lot of type conversions
 			greyscaleTemp <= greyscaleTemp2(11 DOWNTO 0);
 			IF(sramIndex < (TRANSMIT_NUMBER - 1)) THEN
-				IF(regB < (PICTURE_WIDTH * 3) - 1) THEN 
+				IF(regB <= (PICTURE_WIDTH * 3) - 1) THEN 
 					sramIndex <= sramIndex + 1;
 				ELSE
 					sramIndex <= sramIndex;
