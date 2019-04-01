@@ -136,7 +136,7 @@ BEGIN
 	IF(RISING_EDGE(i_clk)) THEN
 		IF(i_fval = '1') THEN
 			IF(i_lval = '1') THEN
-				IF(test_pix_cnt < 10) THEN
+				IF(test_pix_cnt < 9) THEN
 					test_wire <= "111111111111";
 				ELSE
 					test_wire <= "000000000000";
@@ -144,10 +144,10 @@ BEGIN
 				test_pix_cnt <= test_pix_cnt + 1;
 			ELSE
 				test_pix_cnt <= 0;
-				test_wire <= test_wire;
+				test_wire <= "111111111111";
 			END IF;
 		ELSE
-			test_wire <= "000000000000";
+			test_wire <= "111111111111"; --YOU CHANGED THIS from all 0's in case there was delay with correctly setting the first pixel in a row
 			test_pix_cnt <= 0;
 		END IF;
 	END IF;

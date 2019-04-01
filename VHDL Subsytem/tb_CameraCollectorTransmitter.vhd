@@ -113,11 +113,16 @@ BEGIN
 				i_lval <= '1';
 				total_sent <= total_sent + 1;
 				pixel_gen <= "111111111111";
-			ELSIF(lval_gen < 640) THEN
+			ELSIF(lval_gen < 639) THEN
 				lval_gen <= lval_gen +1;
 				i_lval <= '1';
 				total_sent <= total_sent + 1;
 				pixel_gen <= "000000000000";
+			ELSIF(lval_gen < 640) THEN
+				lval_gen <= lval_gen +1;
+				i_lval <= '1';
+				total_sent <= total_sent + 1;
+				pixel_gen <= "111111111111";
 			ELSE
 				lval_gen <= lval_gen +1;
 				i_lval <= '0';
@@ -136,17 +141,19 @@ END PROCESS;
 --generate i_pixel_read signal
 read_generation: PROCESS(i_clk)
 BEGIN
-	IF(read_gen_switch = '1') THEN
-		IF(read_gen_delay < 4) THEN
-			read_gen_delay <= read_gen_delay + 1;
-		ELSIF(read_gen_delay = 4) THEN
-			read_gen_delay <= read_gen_delay + 1;
-			i_pixel_read <= NOT i_pixel_read;
+	IF(RISING_EDGE(i_clk)) THEN
+		IF(read_gen_switch = '1') THEN
+			IF(read_gen_delay < 4) THEN
+				read_gen_delay <= read_gen_delay + 1;
+			ELSIF(read_gen_delay = 4) THEN
+				read_gen_delay <= read_gen_delay + 1;
+				i_pixel_read <= NOT i_pixel_read;
+			ELSE
+				read_gen_delay <= 0;
+			END IF;
 		ELSE
-			read_gen_delay <= 0;
+			i_pixel_read <= '0';
 		END IF;
-	ELSE
-		i_pixel_read <= '0';
 	END IF;
 END PROCESS;
 

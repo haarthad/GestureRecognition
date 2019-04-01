@@ -163,7 +163,7 @@ PORT MAP(
 	o_selectB    => selectB_wire,
 	o_selectC    => selectC_wire,
 	o_selectD    => selectD_wire,
-	o_sram       => sram_wire
+	o_sram       => o_pixel_data
 );
 --========================================
 -- Local Architecture
@@ -173,7 +173,7 @@ state_reg : PROCESS(i_clk, i_finished)
 BEGIN
 	IF (i_finished = '1') THEN 
       pstate <= RESTART;
-   ELSIF (RISING_EDGE(i_clk)) THEN
+   ELSIF (FALLING_EDGE(i_clk)) THEN
       pstate <= nstate;
    END IF;
 END PROCESS;
@@ -292,30 +292,30 @@ END PROCESS;
 transmit : PROCESS(i_clk, i_finished)
 BEGIN
 	IF(i_finished = '1') THEN
-		o_pixel_data <= o_pixel_data;
+		--o_pixel_data <= o_pixel_data;
 		o_valid_pixel <= '0';
 		o_valid_frame <= '0';
 		transmit_delay <= 0;
 		send_count <= 0; --PROBLEM?
-	ELSIF(RISING_EDGE(i_clk)) THEN
+	ELSIF(FALLING_EDGE(i_clk)) THEN
 		IF(pstate = AWAIT_FINISH) THEN
 			o_valid_frame <= '1';
 			IF(i_read_edge = '1') THEN
-				o_pixel_data <= o_pixel_data;
+				--o_pixel_data <= o_pixel_data;
 				o_valid_pixel <= o_valid_pixel;
 				transmit_delay <= 0;
 				send_count <= send_count + 1;
 			ELSE
-				IF(transmit_delay < 1) THEN
-					o_pixel_data <= sram_wire;
+				IF(transmit_delay < 100) THEN
+					--o_pixel_data <= sram_wire;
 					transmit_delay <= transmit_delay + 1;
 					o_valid_pixel <= o_valid_pixel;
-				ELSIF(transmit_delay = 1) THEN
-					o_pixel_data <= o_pixel_data;
+				ELSIF(transmit_delay = 100) THEN
+					--o_pixel_data <= o_pixel_data;
 					o_valid_pixel <= NOT o_valid_pixel;
 					transmit_delay <= transmit_delay + 1;
 				ELSE
-					o_pixel_data <= o_pixel_data;
+					--o_pixel_data <= o_pixel_data;
 					o_valid_pixel <= o_valid_pixel;
 					transmit_delay <= transmit_delay;
 				END IF;
@@ -331,7 +331,7 @@ selectSram_wire <= STD_LOGIC_VECTOR(TO_UNSIGNED(send_count, selectSram_wire'LENG
 
 PROCESS(i_clk)
 BEGIN
-	IF(RISING_EDGE(i_clk)) THEN
+	IF(FALLING_EDGE(i_clk)) THEN
 		IF(send_count < TRANSMIT_NUMBER - 1) THEN
 			i_finished <= '0';
 		ELSE
@@ -343,7 +343,7 @@ END PROCESS;
 
 PROCESS(i_clk)
 BEGIN
-	IF(FALLING_EDGE(i_clk)) THEN
+	IF(RISING_EDGE(i_clk)) THEN
 		--used for i_read edge detection
 		i_read_delayed <= i_pixel_read;
 		--i_pixel_read double edge detection

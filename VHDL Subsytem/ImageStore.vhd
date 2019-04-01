@@ -55,6 +55,7 @@ ARCHITECTURE structural OF ImageStore IS
 --========================================
 TYPE reg_array IS ARRAY(0 TO ((GREYSCALE_PICTURE_WIDTH * GREYSCALE_PICTURE_HEIGHT) - 1)) OF STD_LOGIC_VECTOR((GREYSCALE_PIXEL_WIDTH - 1) DOWNTO 0);
 SIGNAL regFile : reg_array;
+SIGNAL regFileForDebugging : reg_array;
 --=======================================
 -- States Declaration
 --=======================================
