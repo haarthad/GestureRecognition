@@ -4,6 +4,7 @@ This folder contains the Python GPIO/Tensorflow image reception and recognition 
 ## Getting Started
 Run the code provided below to install the required packages to run the scripts in this folder:
 ```
+sudo apt-get update && sudo apt-get upgrade
 sudo apt-get install python3-pip libatlas-base-dev libqtgui4 libqt4-test python3-pyqt5 libjasper-dev libilmbase-dev libopenexr-dev libgstreamer1.0-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev python-rpi.gpio python3-rpi.gpio libhdf5-dev libsdl-ttf2.0-0 libsdl-mixer1.2
 pip3 install tqdm opencv-python tensorflow matplotlib scipy google-api-python-client oauth2client pygame weather-api Pillow keras h5py
 ```
