@@ -25,10 +25,12 @@
 --o_sram         : greyscale pixel stored in SRAM selected by i_selectSram
 
 LIBRARY ieee;
+LIBRARY altera_mf;
 USE ieee. std_logic_1164.all;
 USE ieee.numeric_std.all;
 USE ieee. std_logic_unsigned.all;
 USE work.CAMERA_PACK.all;
+USE altera_mf.altera_mf_components.all;
  
 ENTITY ImageStore IS
 
@@ -55,7 +57,7 @@ ARCHITECTURE structural OF ImageStore IS
 --========================================
 TYPE reg_array IS ARRAY(0 TO ((GREYSCALE_PICTURE_WIDTH * GREYSCALE_PICTURE_HEIGHT) - 1)) OF STD_LOGIC_VECTOR((GREYSCALE_PIXEL_WIDTH - 1) DOWNTO 0);
 SIGNAL regFile : reg_array;
-SIGNAL regFileForDebugging : reg_array;
+--SIGNAL regFileForDebugging : reg_array;
 --=======================================
 -- States Declaration
 --=======================================
@@ -83,10 +85,69 @@ SIGNAL i_regC_math       : STD_LOGIC_VECTOR(PIXEL_WIDTH + 1 DOWNTO 0);
 SIGNAL i_regD_math       : STD_LOGIC_VECTOR(PIXEL_WIDTH + 1 DOWNTO 0);
 SIGNAL greyscaleTemp1    : STD_LOGIC_VECTOR(13 DOWNTO 0);
 SIGNAL greyscaleTemp2    : STD_LOGIC_VECTOR(13 DOWNTO 0);
+SIGNAL greenAdded        : UNSIGNED(13 DOWNTO 0);
+SIGNAL greenDivided      :	UNSIGNED(13 DOWNTO 0);
+SIGNAL colorsAdded       : UNSIGNED(13 DOWNTO 0);
+
+SIGNAL data_debug        : STD_LOGIC_VECTOR(7 DOWNTO 0);
+SIGNAL addr_debug        : STD_LOGIC_VECTOR(GREYSCALE_REG_NUM_BIN - 1 DOWNTO 0);
+SIGNAL we_debug          : STD_LOGIC := '1';
+SIGNAL clk_debug         : STD_LOGIC;
+SIGNAL q_debug           : STD_LOGIC_VECTOR(7 DOWNTO 0);
+--========================================
+-- Component Declarations
+--========================================
+--COMPONENT single_port_ram IS
+--	PORT
+--	(
+--		data	: IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+--		addr	: IN NATURAL RANGE 0 TO ((GREYSCALE_PICTURE_WIDTH * GREYSCALE_PICTURE_HEIGHT) - 1);
+--		we		: IN STD_LOGIC;
+--		clk	: IN STD_LOGIC;
+--		q		: OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
+--	);
+--END COMPONENT;
 --========================================
 -- Local Architecture
 --========================================
 BEGIN
+--========================================
+-- Map Components
+--========================================
+----------========================================
+---------- debugging ram
+----------========================================
+--debugRam: single_port_ram
+--PORT MAP(
+--	data => data_debug,
+--	addr => addr_debug,
+--	we   => we_debug,
+--	clk  => clk_debug,
+--	q    => q_debug
+--);
+altsyncram_debugging : altsyncram
+	GENERIC MAP (
+		operation_mode => "SINGLE_PORT",
+		width_a => 8,
+		widthad_a => 17,
+		numwords_a => 76800,
+		outdata_reg_a => "UNREGISTERED",
+		address_aclr_a => "NONE",
+		outdata_aclr_a => "NONE",
+		indata_aclr_a => "NONE",
+		wrcontrol_aclr_a => "NONE",
+		lpm_hint => "ENABLE_RUNTIME_MOD=YES,INSTANCE_NAME=altsyncram_debugging",
+		lpm_type => "altsyncram",
+		read_during_write_mode_port_a => "DONT_CARE"
+	)
+	PORT MAP (
+	  address_a => addr_debug,
+	  clock0 => i_clk,
+	  data_a => data_debug,
+	  wren_a => we_debug,
+	  q_a => q_debug
+	);
+ 
 --CLOCK THE STATE
 state_reg : PROCESS(i_clk, i_finished)
 BEGIN
@@ -218,7 +279,7 @@ BEGIN
 		END IF;
 		sramIndex_delayed <= sramIndex;
 		regFile(sramIndex_delayed) <= greyscalePixel;
-		o_sram <=  regFile(TO_INTEGER(UNSIGNED(i_selectSram)));
+		o_sram <= regFile(TO_INTEGER(UNSIGNED(i_selectSram)));
 	END IF;
 END PROCESS;
 
@@ -234,7 +295,18 @@ i_regB_math <= "00" & i_regB;
 i_regC_math <= "00" & i_regC;
 i_regD_math <= "00" & i_regD;
 
-greyscaleTemp1 <= STD_LOGIC_VECTOR(UNSIGNED((((UNSIGNED(i_regA_math) + UNSIGNED(i_regD_math))/2)+UNSIGNED(i_regB_math)+UNSIGNED(i_regC_math))/3));
-greyscaleTemp2 <= STD_LOGIC_VECTOR(UNSIGNED((((UNSIGNED(i_regA_math) + UNSIGNED(i_regD_math))/2)+UNSIGNED(i_regB_math)+UNSIGNED(i_regC_math))/3));
+greenAdded <= UNSIGNED(i_regA_math) + UNSIGNED(i_regD_math);
+greenDivided <= greenAdded / 2;
+colorsAdded <= greenDivided + UNSIGNED(i_regB_math) + UNSIGNED(i_regC_math);
+greyscaleTemp1 <= STD_LOGIC_VECTOR(colorsAdded / 3);
+greyscaleTemp2 <= STD_LOGIC_VECTOR(colorsAdded / 3);
+
+--greyscaleTemp1 <= STD_LOGIC_VECTOR(UNSIGNED((((UNSIGNED(i_regA_math) + UNSIGNED(i_regD_math))/2)+UNSIGNED(i_regB_math)+UNSIGNED(i_regC_math))/3));
+--greyscaleTemp2 <= STD_LOGIC_VECTOR(UNSIGNED((((UNSIGNED(i_regA_math) + UNSIGNED(i_regD_math))/2)+UNSIGNED(i_regB_math)+UNSIGNED(i_regC_math))/3));
+
+data_debug <= greyscalePixel;
+addr_debug <= STD_LOGIC_VECTOR(TO_UNSIGNED(sramIndex_delayed, addr_debug'LENGTH));
+we_debug   <= '1';
+clk_debug  <= i_clk;
 
 END structural;

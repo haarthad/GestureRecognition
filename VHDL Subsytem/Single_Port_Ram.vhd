@@ -2,6 +2,7 @@
 --modified for this project
 library ieee;
 use ieee.std_logic_1164.all;
+USE work.CAMERA_PACK.all;
 
 entity single_port_ram is
 	port
