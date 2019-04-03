@@ -123,6 +123,8 @@ SIGNAL i_read_delayed    : STD_LOGIC := '0';
 SIGNAL i_read_edge       : STD_LOGIC := '0';
 SIGNAL i_read_edge1      : STD_LOGIC := '0';
 SIGNAL i_read_edge2      : STD_LOGIC := '0';
+SIGNAL i_fval_delayed    : STD_LOGIC;
+SIGNAL i_fval_edge       : STD_LOGIC;
 
 BEGIN
 --========================================
@@ -196,7 +198,7 @@ BEGIN
       WHEN AWAIT_FRAME =>
          IF (i_finished = '1') THEN
             nstate <= RESTART;
-         ELSIF (i_fval = '1') THEN
+         ELSIF (i_fval_edge = '1') THEN
             nstate <= COLLECT;
 			ELSE
 				nstate <= AWAIT_FRAME;
@@ -348,9 +350,13 @@ BEGIN
 		i_read_delayed <= i_pixel_read;
 		--i_pixel_read double edge detection
 		i_read_edge <= i_read_edge1 OR i_read_edge2;
+		--i__fval edge detection
+		i_fval_delayed <= i_fval;
 	END IF;
 END PROCESS;
 
+--i_fval rising edge detection
+i_fval_edge <= i_fval AND NOT i_fval_delayed;
 
 --i_lval falling edge detection. lval_edge strobes high one clock period when
 --i_lval toggles from high to low. This works because of the process rowCounting.
