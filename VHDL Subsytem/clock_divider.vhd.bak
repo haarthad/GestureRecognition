@@ -31,7 +31,7 @@ signal S_CLK : STD_LOGIC := '0';
 
 --Clock division integer declarations
 signal   CLK_CNT : integer := 0;
-constant CLK_DIV : integer := 2000;
+constant CLK_DIV : integer := 2;
 
 begin
 

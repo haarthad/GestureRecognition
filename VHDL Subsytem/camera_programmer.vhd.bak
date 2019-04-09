@@ -65,11 +65,6 @@ constant MESSAGE : std_logic_vector(563 downto 0) :=
 "00000000000000000000000000000000000000000000111111" &
 "11111000000000";
 
---Clock alignment signal declarations
-signal S_SCLK    : std_logic;
-signal PREV_DATA : std_logic := '1';
-signal SYNCED    : std_logic := '0';
-
 --Program message counter declaration
 signal MSG_CNT   : integer range 0 to 563 := 563;
 constant MSG_MAX : integer := 563;
@@ -121,7 +116,7 @@ CLK_DIV : CLOCK_DIVIDER
 port map(
 	I_RST_N => I_RST_N,
 	I_CLK   => I_CLK50MHZ,
-	O_CLK   => S_SCLK
+	O_CLK   => O_SCLK
 );
 
 -- Set SDATA
@@ -132,36 +127,31 @@ begin
 		MSG_CNT  <= MSG_MAX;
 		MSG_DONE <= '0';
 		MSG_DATA <= '1';
-		SYNCED   <= '0';
-		PREV_DATA<= '1';
-	--Rising edge clock case
+	--Falling edge clock case
 	elsif rising_edge(I_CLK50MHZ) then
-	
 		--System has fully reset and set-up delay has expired
 		if(RST_EN = '1') then
 		
-			--Clock has not yet been synced
-			if(SYNCED = '0') then
-				--First valid rising edge of SCLK detected
-				if(PREV_DATA = '0' and S_SCLK = '1') then
-					SYNCED = '1';
-					PREV_DATA <= '1';
-				--First valid rising edge of SCLK has not yet occurred.
-				else
-					SYNCED = '0';
-					PREV_DATA <= S_SCLK;
-				end if;
-			--Clock has been synced
-			else
-		
+			--Message is still ongoing
+			if(MSG_DONE = '0') then
+			
+				MSG_DATA <= MESSAGE(MSG_CNT);
+			
+				--Message has been transmitted
+				if(MSG_CNT = 0) then
+					MSG_CNT  <= MSG_MAX;
+					MSG_DONE <= '1';
 				--Message is still transmitting
-				if(MSG_DONE = '0') then
-		
-				--Message transmission complete
-				else 
+				else
+					MSG_CNT  <= MSG_CNT - 1;
+					MSG_DONE <= '0';
 				end if;
-		
-		
+			
+			--Message has completed transmission
+			else
+				MSG_CNT  <= MSG_MAX;
+				MSG_DONE <= '1';
+				MSG_DATA <= '1';
 			end if;
 			
 		--Reset has not completed and delay has not expired
@@ -170,15 +160,11 @@ begin
 			MSG_DONE <= '0';
 			MSG_DATA <= '1';
 		end if;
-		
 	end if;
 end process;
 
 --SDATA Assignment
 O_SDATA <= MSG_DATA;
-
---SCLK Assignment
-O_SCLK <= S_SCLK;
 
 --Set program done
 DONE_DELAY: process (I_RST_N, I_CLK50MHZ)
