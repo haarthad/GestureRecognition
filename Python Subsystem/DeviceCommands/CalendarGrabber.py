@@ -1,3 +1,8 @@
+##################################################################################################
+# Script that logs into google calendar through google apis and pulls the next 10 events from the 
+# user specified via credential files
+##################################################################################################
+
 from __future__ import print_function
 import datetime
 from googleapiclient.discovery import build
@@ -8,6 +13,14 @@ import logging
 # If modifying these scopes, delete the file token.json.
 SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
 
+##################################################################################################
+# Main logic
+##################################################################################################
+
+"""
+pulls data from the specified user's calendar
+:param commands_path Path to token file
+"""
 def main(commands_path):
     """Shows basic usage of the Google Calendar API.
     Prints the start and name of the next 10 events on the user's calendar.
@@ -41,13 +54,20 @@ def main(commands_path):
     for event in events:
         startInfo = event['start'].get('dateTime', event['start'].get('date'))
         endInfo = event['end'].get('dateTime', event['end'].get('date'))
+		# divvy up info based on delimiting charater
         day = startInfo.split('T')[0]
+		# determine starttime/endtime based on json positioning
         if 'T' in startInfo:
             startTime = (startInfo.split('T')[1]).split('-')[0]
             endTime = (endInfo.split('T')[1]).split('-')[0]
+			# print in nice format for case where startime/endtime are found
             print(day, event['summary'], startTime, '-', endTime)
-        else:
+        # else print a standard format w/o starttime/endtime in the event that they are not found
+		else:
             print(day, event['summary'])
 
+"""
+default main block
+"""
 if __name__ == '__main__':
     main("")
