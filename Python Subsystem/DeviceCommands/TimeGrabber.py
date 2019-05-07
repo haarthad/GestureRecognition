@@ -12,7 +12,7 @@ import sys, time
 Uses datetime to grab the current time
 https://stackoverflow.com/questions/37515587/run-a-basic-digital-clock-in-the-python-shell
 """
-def displayClock()
+def displayClock():
             from datetime import datetime
             now = datetime.now()
             print("\r%s/%s/%s %s:%s:%s\r\n" % (now.month, now.day, now.year, now.hour, now.minute, now.second), flush=True, end='')

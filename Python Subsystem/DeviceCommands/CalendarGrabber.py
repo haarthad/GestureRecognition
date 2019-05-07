@@ -54,16 +54,16 @@ def main(commands_path):
     for event in events:
         startInfo = event['start'].get('dateTime', event['start'].get('date'))
         endInfo = event['end'].get('dateTime', event['end'].get('date'))
-		# divvy up info based on delimiting charater
+        # divvy up info based on delimiting charater
         day = startInfo.split('T')[0]
-		# determine starttime/endtime based on json positioning
+        # determine starttime/endtime based on json positioning
         if 'T' in startInfo:
             startTime = (startInfo.split('T')[1]).split('-')[0]
             endTime = (endInfo.split('T')[1]).split('-')[0]
-			# print in nice format for case where startime/endtime are found
+            # print in nice format for case where startime/endtime are found
             print(day, event['summary'], startTime, '-', endTime)
         # else print a standard format w/o starttime/endtime in the event that they are not found
-		else:
+        else:
             print(day, event['summary'])
 
 """

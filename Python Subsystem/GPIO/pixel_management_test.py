@@ -38,27 +38,30 @@ def picSender(pixelQueue, stableQueue, finishedQueue):
     sleep(1)
     while 1:
             print("Perform Gesture.")
-            sleep(5)
-            print("Gesture Captured")
+            sleep(3)
             # Get most recent image in video buffer
             # This is done due to the slow execution on the pi
+            image = None
             for i in range(10):
                 ret, image = camera.read()
 
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            image = cv2.flip(image,0)
-            image = cv2.flip(image,1)
-            image = cv2.resize(image,(64,64))
-            i = 0
-            while i < 64:
-                j = 0
-                while j < 64:
-                    graypix = image[i, j]
-                    finishedQueue.get()
-                    pixelQueue.put(graypix)
-                    stableQueue.put('1')
-                    j += 1
-                i += 1
+            if image is not None:
+                print("Gesture Captured")
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                image = cv2.flip(image,0)
+                image = cv2.flip(image,1)
+                cv2.imshow('Image',image)
+                image = cv2.resize(image,(64,64))
+                i = 0
+                while i < 64:
+                    j = 0
+                    while j < 64:
+                        graypix = image[i, j]
+                        finishedQueue.get()
+                        pixelQueue.put(graypix)
+                        stableQueue.put('1')
+                        j += 1
+                    i += 1
 
 
 
