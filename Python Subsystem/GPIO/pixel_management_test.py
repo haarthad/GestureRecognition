@@ -37,6 +37,7 @@ def picSender(pixelQueue, stableQueue, finishedQueue):
     camera = cv2.VideoCapture(0)
     sleep(1)
     while 1:
+            sleep(1)
             print("Perform Gesture.")
             sleep(3)
             # Get most recent image in video buffer
@@ -48,6 +49,7 @@ def picSender(pixelQueue, stableQueue, finishedQueue):
             if image is not None:
                 print("Gesture Captured")
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
                 image = cv2.flip(image,0)
                 image = cv2.flip(image,1)
                 cv2.imshow('Image',image)

@@ -1,0 +1,273 @@
+\hypertarget{namespaceCreateModel}{}\section{Create\+Model Namespace Reference}
+\label{namespaceCreateModel}\index{Create\+Model@{Create\+Model}}
+
+
+This file creates a C\+NN model, saved in the Saved\+Models folder, with training images found in the Image\+Data/\+Training folder.  
+
+
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{namespaceCreateModel_afc24d24604298f3a50faeeca6c6a1671}{select\+Label} (image)
+\begin{DoxyCompactList}\small\item\em Returns the appropriate \char`\"{}hot\char`\"{} label for the provided image based on the filename. \end{DoxyCompactList}\item 
+def \hyperlink{namespaceCreateModel_afbe2ef216c8769c9300c48038330bdce}{image\+Transformation} (image, path)
+\begin{DoxyCompactList}\small\item\em Perform sobel, noise, rotation, and translation transformations on the provided image, and return an array of images that have the transformations applied. \end{DoxyCompactList}\item 
+def \hyperlink{namespaceCreateModel_a13d98b7ab2f39bdfb831e2f87a299c7e}{load\+Training\+Data} ()
+\begin{DoxyCompactList}\small\item\em Reads in all training images, and returns them as Tensor\+Flow images with labels attached. \end{DoxyCompactList}\item 
+def \hyperlink{namespaceCreateModel_a6d6154f59653471f7fc359cca6daabff}{load\+Testing\+Data} ()
+\begin{DoxyCompactList}\small\item\em Reads in all testing images, and returns them as Tensor\+Flow images with labels attached. \end{DoxyCompactList}\item 
+def \hyperlink{namespaceCreateModel_a6b6cb30f9a38350655c81bf380898084}{load\+Personal\+Testing\+Data} ()
+\begin{DoxyCompactList}\small\item\em Reads in all personal testing images, and returns them as Tensor\+Flow images with labels attached. \end{DoxyCompactList}\item 
+def \hyperlink{namespaceCreateModel_a596ac84e0b693e1daeb598454dc87f74}{plot\+Image} (i, predictions\+\_\+array, true\+\_\+label, img)
+\begin{DoxyCompactList}\small\item\em Plots a single image with the predicted and real gesture underneath the image. \end{DoxyCompactList}\item 
+def \hyperlink{namespaceCreateModel_aacc54b5b2352d3bc82ddf0d6947f664f}{plot\+Value\+Array} (i, predictions\+\_\+array, true\+\_\+label)
+\begin{DoxyCompactList}\small\item\em Plots the gesture prediction percentages next to the image. \end{DoxyCompactList}\item 
+def \hyperlink{namespaceCreateModel_a71cf3aed17e6928f553b708b0b71833f}{process\+Images} (image\+\_\+list)
+\begin{DoxyCompactList}\small\item\em Takes in a list of images, reshapes them to work with the convolution layers, applies a label to each image, and changes the value to be between 0 and 1. \end{DoxyCompactList}\item 
+def \hyperlink{namespaceCreateModel_a4fe88b0b4e6d006ace78866bd98f8553}{setup\+Model} ()
+\begin{DoxyCompactList}\small\item\em Adds layers and other configuration settings to a model. \end{DoxyCompactList}\item 
+def \hyperlink{namespaceCreateModel_a903f50a90eaf893ccc92d235be6e5a81}{print\+Accuracy\+Graph} (model, images, labels, image\+\_\+list)
+\begin{DoxyCompactList}\small\item\em Prints a 5x5 graph of images from the image\+\_\+list with the predicted category, and the prediction values for the image for each category. \end{DoxyCompactList}\item 
+def \hyperlink{namespaceCreateModel_a34139424c0de1bb7aaf8f04b931ba11f}{main\+Logic} ()
+\begin{DoxyCompactList}\small\item\em Main logic of the script that reads in images, formats, creates model, tests model, and then saves the model. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{namespaceCreateModel_a9f0bc6431cc83069b693958a7b0c2309}\label{namespaceCreateModel_a9f0bc6431cc83069b693958a7b0c2309}} 
+string {\bfseries T\+R\+A\+I\+N\+I\+N\+G\+\_\+\+D\+A\+TA} = \textquotesingle{}Image\+Data/Train\textquotesingle{}
+\item 
+\mbox{\Hypertarget{namespaceCreateModel_a44d00c59bf3ee18a9c78b79bf92d3fe5}\label{namespaceCreateModel_a44d00c59bf3ee18a9c78b79bf92d3fe5}} 
+string {\bfseries T\+E\+S\+T\+I\+N\+G\+\_\+\+D\+A\+TA} = \textquotesingle{}Image\+Data/Test\textquotesingle{}
+\item 
+\mbox{\Hypertarget{namespaceCreateModel_a572af130af697bdbac12baef11ee7bc2}\label{namespaceCreateModel_a572af130af697bdbac12baef11ee7bc2}} 
+string {\bfseries E\+X\+T\+R\+A\+\_\+\+T\+E\+S\+T\+I\+N\+G\+\_\+\+D\+A\+TA} = \textquotesingle{}Image\+Data/Extra\+Test\textquotesingle{}
+\item 
+\mbox{\Hypertarget{namespaceCreateModel_a1a30a9f91b8da29f5b1ee6f5cfba8c74}\label{namespaceCreateModel_a1a30a9f91b8da29f5b1ee6f5cfba8c74}} 
+list {\bfseries G\+E\+S\+T\+U\+R\+E\+\_\+\+N\+A\+M\+ES} = \mbox{[}\textquotesingle{}A\textquotesingle{}, \textquotesingle{}B\textquotesingle{}, \textquotesingle{}C\textquotesingle{}, \textquotesingle{}G\textquotesingle{}, \textquotesingle{}V\textquotesingle{}, \textquotesingle{}Nothing\textquotesingle{}\mbox{]}
+\item 
+\mbox{\Hypertarget{namespaceCreateModel_a98583f9cbb5b32917eec895bbd7186dd}\label{namespaceCreateModel_a98583f9cbb5b32917eec895bbd7186dd}} 
+int {\bfseries X\+\_\+\+O\+F\+\_\+\+I\+M\+A\+G\+ES} = 64
+\item 
+\mbox{\Hypertarget{namespaceCreateModel_aa5ce535c8a1341fc751a755d6d36e353}\label{namespaceCreateModel_aa5ce535c8a1341fc751a755d6d36e353}} 
+int {\bfseries Y\+\_\+\+O\+F\+\_\+\+I\+M\+A\+G\+ES} = 64
+\item 
+\mbox{\Hypertarget{namespaceCreateModel_af27302be2f29c6fb8905f6888584f542}\label{namespaceCreateModel_af27302be2f29c6fb8905f6888584f542}} 
+int {\bfseries N\+U\+M\+B\+E\+R\+\_\+\+O\+F\+\_\+\+E\+P\+O\+C\+HS} = 30
+\item 
+\mbox{\Hypertarget{namespaceCreateModel_a7bc3a7b80845927156b38b68d85d44a6}\label{namespaceCreateModel_a7bc3a7b80845927156b38b68d85d44a6}} 
+int {\bfseries N\+U\+M\+B\+E\+R\+\_\+\+O\+F\+\_\+\+G\+E\+S\+T\+U\+R\+ES} = 6
+\item 
+\mbox{\Hypertarget{namespaceCreateModel_aff0245a5a8e75afd246d7a9fdb6d954d}\label{namespaceCreateModel_aff0245a5a8e75afd246d7a9fdb6d954d}} 
+int {\bfseries B\+A\+T\+C\+H\+\_\+\+S\+I\+ZE} = 50
+\item 
+\mbox{\Hypertarget{namespaceCreateModel_a1378a27e386eec054835aa6fa3d7aef5}\label{namespaceCreateModel_a1378a27e386eec054835aa6fa3d7aef5}} 
+float {\bfseries W\+H\+I\+T\+E\+\_\+\+C\+O\+L\+OR} = 255.\+0
+\item 
+\mbox{\Hypertarget{namespaceCreateModel_a4ee5b85e526c6fee1bdd4a2ca901ab91}\label{namespaceCreateModel_a4ee5b85e526c6fee1bdd4a2ca901ab91}} 
+{\bfseries matrix\+\_\+rotate\+\_\+right} = cv2.\+get\+Rotation\+Matrix2D((X\+\_\+\+O\+F\+\_\+\+I\+M\+A\+G\+ES / 2, Y\+\_\+\+O\+F\+\_\+\+I\+M\+A\+G\+ES / 2), 30, 1)
+\item 
+\mbox{\Hypertarget{namespaceCreateModel_ab68d73fa857968927d5d2d4b0330e7f9}\label{namespaceCreateModel_ab68d73fa857968927d5d2d4b0330e7f9}} 
+{\bfseries matrix\+\_\+rotate\+\_\+left} = cv2.\+get\+Rotation\+Matrix2D((X\+\_\+\+O\+F\+\_\+\+I\+M\+A\+G\+ES / 2, Y\+\_\+\+O\+F\+\_\+\+I\+M\+A\+G\+ES / 2), -\/30, 1)
+\item 
+\mbox{\Hypertarget{namespaceCreateModel_aea5e825cc10d1efa9e14927f0ef522ee}\label{namespaceCreateModel_aea5e825cc10d1efa9e14927f0ef522ee}} 
+{\bfseries matrix\+\_\+translate\+\_\+top\+\_\+left} = np.\+float32(\mbox{[}\mbox{[}1, 0, -\/15\mbox{]}, \mbox{[}0, 1, 15\mbox{]}\mbox{]})
+\item 
+\mbox{\Hypertarget{namespaceCreateModel_ae9ca04b527734b99a3dc4a8dfb9b8cbe}\label{namespaceCreateModel_ae9ca04b527734b99a3dc4a8dfb9b8cbe}} 
+{\bfseries matrix\+\_\+translate\+\_\+top\+\_\+right} = np.\+float32(\mbox{[}\mbox{[}1, 0, 15\mbox{]}, \mbox{[}0, 1, 15\mbox{]}\mbox{]})
+\item 
+\mbox{\Hypertarget{namespaceCreateModel_a3f62b3ff1071b4e9ae47d45aacadf4a7}\label{namespaceCreateModel_a3f62b3ff1071b4e9ae47d45aacadf4a7}} 
+{\bfseries matrix\+\_\+translate\+\_\+bot\+\_\+left} = np.\+float32(\mbox{[}\mbox{[}1, 0, -\/15\mbox{]}, \mbox{[}0, 1, -\/15\mbox{]}\mbox{]})
+\item 
+\mbox{\Hypertarget{namespaceCreateModel_a869705e838f1b0347b1bb8a968f69dfe}\label{namespaceCreateModel_a869705e838f1b0347b1bb8a968f69dfe}} 
+{\bfseries matrix\+\_\+translate\+\_\+bot\+\_\+right} = np.\+float32(\mbox{[}\mbox{[}1, 0, 15\mbox{]}, \mbox{[}0, 1, -\/15\mbox{]}\mbox{]})
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This file creates a C\+NN model, saved in the Saved\+Models folder, with training images found in the Image\+Data/\+Training folder. 
+
+It runs the images through a complex Tensor\+Flow model consisting of Convolution layers and Neural Network layers to reach a high prediction accuracy of 94-\/97\%. The model works best with using a simple solid white or black background.
+
+Ideas the follow article were used for loading in images from a folder, creating a C\+NN model, and other miscellaneous methods\+: \href{https://blog.francium.tech/build-your-own-image-classifier-with-tensorflow-}{\tt https\+://blog.\+francium.\+tech/build-\/your-\/own-\/image-\/classifier-\/with-\/tensorflow-\/} and-\/keras-\/dc147a15e38e
+
+Ideas from Tensor\+Flow\textquotesingle{}s basic classification were preprocessing the data, setting up model layers and configurations, and different ways to plot the images\+: \href{https://www.tensorflow.org/tutorials/keras/basic_classification}{\tt https\+://www.\+tensorflow.\+org/tutorials/keras/basic\+\_\+classification}
+
+Images in the training and test folder were gathered from the Jochen Triesch Static Hand Posture Database and the Sebastien Marcel Static Hand Posture Database based at \href{http://www.idiap.ch/resource/gestures/}{\tt http\+://www.\+idiap.\+ch/resource/gestures/} 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{namespaceCreateModel_afbe2ef216c8769c9300c48038330bdce}\label{namespaceCreateModel_afbe2ef216c8769c9300c48038330bdce}} 
+\index{Create\+Model@{Create\+Model}!image\+Transformation@{image\+Transformation}}
+\index{image\+Transformation@{image\+Transformation}!Create\+Model@{Create\+Model}}
+\subsubsection{\texorpdfstring{image\+Transformation()}{imageTransformation()}}
+{\footnotesize\ttfamily def Create\+Model.\+image\+Transformation (\begin{DoxyParamCaption}\item[{}]{image,  }\item[{}]{path }\end{DoxyParamCaption})}
+
+
+
+Perform sobel, noise, rotation, and translation transformations on the provided image, and return an array of images that have the transformations applied. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image} & Image to be transformed \\
+\hline
+{\em path} & Filepath to the image \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespaceCreateModel_a6b6cb30f9a38350655c81bf380898084}\label{namespaceCreateModel_a6b6cb30f9a38350655c81bf380898084}} 
+\index{Create\+Model@{Create\+Model}!load\+Personal\+Testing\+Data@{load\+Personal\+Testing\+Data}}
+\index{load\+Personal\+Testing\+Data@{load\+Personal\+Testing\+Data}!Create\+Model@{Create\+Model}}
+\subsubsection{\texorpdfstring{load\+Personal\+Testing\+Data()}{loadPersonalTestingData()}}
+{\footnotesize\ttfamily def Create\+Model.\+load\+Personal\+Testing\+Data (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Reads in all personal testing images, and returns them as Tensor\+Flow images with labels attached. 
+
+\begin{DoxyReturn}{Returns}
+\+: Personal testing images with labels 
+\end{DoxyReturn}
+\mbox{\Hypertarget{namespaceCreateModel_a6d6154f59653471f7fc359cca6daabff}\label{namespaceCreateModel_a6d6154f59653471f7fc359cca6daabff}} 
+\index{Create\+Model@{Create\+Model}!load\+Testing\+Data@{load\+Testing\+Data}}
+\index{load\+Testing\+Data@{load\+Testing\+Data}!Create\+Model@{Create\+Model}}
+\subsubsection{\texorpdfstring{load\+Testing\+Data()}{loadTestingData()}}
+{\footnotesize\ttfamily def Create\+Model.\+load\+Testing\+Data (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Reads in all testing images, and returns them as Tensor\+Flow images with labels attached. 
+
+\begin{DoxyReturn}{Returns}
+\+: Testing images with labels 
+\end{DoxyReturn}
+\mbox{\Hypertarget{namespaceCreateModel_a13d98b7ab2f39bdfb831e2f87a299c7e}\label{namespaceCreateModel_a13d98b7ab2f39bdfb831e2f87a299c7e}} 
+\index{Create\+Model@{Create\+Model}!load\+Training\+Data@{load\+Training\+Data}}
+\index{load\+Training\+Data@{load\+Training\+Data}!Create\+Model@{Create\+Model}}
+\subsubsection{\texorpdfstring{load\+Training\+Data()}{loadTrainingData()}}
+{\footnotesize\ttfamily def Create\+Model.\+load\+Training\+Data (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Reads in all training images, and returns them as Tensor\+Flow images with labels attached. 
+
+\begin{DoxyReturn}{Returns}
+\+: Training images with labels 
+\end{DoxyReturn}
+\mbox{\Hypertarget{namespaceCreateModel_a34139424c0de1bb7aaf8f04b931ba11f}\label{namespaceCreateModel_a34139424c0de1bb7aaf8f04b931ba11f}} 
+\index{Create\+Model@{Create\+Model}!main\+Logic@{main\+Logic}}
+\index{main\+Logic@{main\+Logic}!Create\+Model@{Create\+Model}}
+\subsubsection{\texorpdfstring{main\+Logic()}{mainLogic()}}
+{\footnotesize\ttfamily def Create\+Model.\+main\+Logic (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Main logic of the script that reads in images, formats, creates model, tests model, and then saves the model. 
+
+\mbox{\Hypertarget{namespaceCreateModel_a596ac84e0b693e1daeb598454dc87f74}\label{namespaceCreateModel_a596ac84e0b693e1daeb598454dc87f74}} 
+\index{Create\+Model@{Create\+Model}!plot\+Image@{plot\+Image}}
+\index{plot\+Image@{plot\+Image}!Create\+Model@{Create\+Model}}
+\subsubsection{\texorpdfstring{plot\+Image()}{plotImage()}}
+{\footnotesize\ttfamily def Create\+Model.\+plot\+Image (\begin{DoxyParamCaption}\item[{}]{i,  }\item[{}]{predictions\+\_\+array,  }\item[{}]{true\+\_\+label,  }\item[{}]{img }\end{DoxyParamCaption})}
+
+
+
+Plots a single image with the predicted and real gesture underneath the image. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em i} & Iteration number in array of images \\
+\hline
+{\em predictions\+\_\+array} & Array of gesture predictions percentages for image \\
+\hline
+{\em true\+\_\+label} & Correct gesture for the image provided \\
+\hline
+{\em img} & Image to plot \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespaceCreateModel_aacc54b5b2352d3bc82ddf0d6947f664f}\label{namespaceCreateModel_aacc54b5b2352d3bc82ddf0d6947f664f}} 
+\index{Create\+Model@{Create\+Model}!plot\+Value\+Array@{plot\+Value\+Array}}
+\index{plot\+Value\+Array@{plot\+Value\+Array}!Create\+Model@{Create\+Model}}
+\subsubsection{\texorpdfstring{plot\+Value\+Array()}{plotValueArray()}}
+{\footnotesize\ttfamily def Create\+Model.\+plot\+Value\+Array (\begin{DoxyParamCaption}\item[{}]{i,  }\item[{}]{predictions\+\_\+array,  }\item[{}]{true\+\_\+label }\end{DoxyParamCaption})}
+
+
+
+Plots the gesture prediction percentages next to the image. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em i} & Iteration number in array of images \\
+\hline
+{\em predictions\+\_\+array} & Array of gesture predictions percentages for image \\
+\hline
+{\em true\+\_\+label} & Correct gesture for the image provided \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespaceCreateModel_a903f50a90eaf893ccc92d235be6e5a81}\label{namespaceCreateModel_a903f50a90eaf893ccc92d235be6e5a81}} 
+\index{Create\+Model@{Create\+Model}!print\+Accuracy\+Graph@{print\+Accuracy\+Graph}}
+\index{print\+Accuracy\+Graph@{print\+Accuracy\+Graph}!Create\+Model@{Create\+Model}}
+\subsubsection{\texorpdfstring{print\+Accuracy\+Graph()}{printAccuracyGraph()}}
+{\footnotesize\ttfamily def Create\+Model.\+print\+Accuracy\+Graph (\begin{DoxyParamCaption}\item[{}]{model,  }\item[{}]{images,  }\item[{}]{labels,  }\item[{}]{image\+\_\+list }\end{DoxyParamCaption})}
+
+
+
+Prints a 5x5 graph of images from the image\+\_\+list with the predicted category, and the prediction values for the image for each category. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em model} & Model to predict images \\
+\hline
+{\em images} & Images to be predicted \\
+\hline
+{\em labels} & Labels for the images \\
+\hline
+{\em image\+\_\+list} & Images to be printed \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespaceCreateModel_a71cf3aed17e6928f553b708b0b71833f}\label{namespaceCreateModel_a71cf3aed17e6928f553b708b0b71833f}} 
+\index{Create\+Model@{Create\+Model}!process\+Images@{process\+Images}}
+\index{process\+Images@{process\+Images}!Create\+Model@{Create\+Model}}
+\subsubsection{\texorpdfstring{process\+Images()}{processImages()}}
+{\footnotesize\ttfamily def Create\+Model.\+process\+Images (\begin{DoxyParamCaption}\item[{}]{image\+\_\+list }\end{DoxyParamCaption})}
+
+
+
+Takes in a list of images, reshapes them to work with the convolution layers, applies a label to each image, and changes the value to be between 0 and 1. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+list} & List of images \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reshaped images and their labels 
+\end{DoxyReturn}
+\mbox{\Hypertarget{namespaceCreateModel_afc24d24604298f3a50faeeca6c6a1671}\label{namespaceCreateModel_afc24d24604298f3a50faeeca6c6a1671}} 
+\index{Create\+Model@{Create\+Model}!select\+Label@{select\+Label}}
+\index{select\+Label@{select\+Label}!Create\+Model@{Create\+Model}}
+\subsubsection{\texorpdfstring{select\+Label()}{selectLabel()}}
+{\footnotesize\ttfamily def Create\+Model.\+select\+Label (\begin{DoxyParamCaption}\item[{}]{image }\end{DoxyParamCaption})}
+
+
+
+Returns the appropriate \char`\"{}hot\char`\"{} label for the provided image based on the filename. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image} & Tensor\+Flow image to assign label to. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Label for the image 
+\end{DoxyReturn}
+\mbox{\Hypertarget{namespaceCreateModel_a4fe88b0b4e6d006ace78866bd98f8553}\label{namespaceCreateModel_a4fe88b0b4e6d006ace78866bd98f8553}} 
+\index{Create\+Model@{Create\+Model}!setup\+Model@{setup\+Model}}
+\index{setup\+Model@{setup\+Model}!Create\+Model@{Create\+Model}}
+\subsubsection{\texorpdfstring{setup\+Model()}{setupModel()}}
+{\footnotesize\ttfamily def Create\+Model.\+setup\+Model (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Adds layers and other configuration settings to a model. 
+
+\begin{DoxyReturn}{Returns}
+Model with layers and configuration 
+\end{DoxyReturn}

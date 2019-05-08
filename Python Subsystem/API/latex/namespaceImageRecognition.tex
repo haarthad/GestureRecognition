@@ -1,0 +1,122 @@
+\hypertarget{namespaceImageRecognition}{}\section{Image\+Recognition Namespace Reference}
+\label{namespaceImageRecognition}\index{Image\+Recognition@{Image\+Recognition}}
+
+
+Main file for the Image Recognition portion of the system.  
+
+
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{namespaceImageRecognition_ae839052fe2fa16ffa7804966c331f792}{init\+Recognition} (model\+\_\+path)
+\begin{DoxyCompactList}\small\item\em Initializes the recognition part of the system and any variables, and loads the default model that was created earlier. \end{DoxyCompactList}\item 
+def \hyperlink{namespaceImageRecognition_a29b55a32880e0e8ab9e35c25094e75c4}{validate\+Image} (image)
+\begin{DoxyCompactList}\small\item\em Validates that all pixel values in the image are within valid pixel ranges, 0 and 255. \end{DoxyCompactList}\item 
+def \hyperlink{namespaceImageRecognition_af3a8ad13ef194bb7126f55c31eaa06db}{process\+Image} (pixel\+\_\+queue, error\+\_\+queue, model, commands\+\_\+path, new\+\_\+gesture)
+\begin{DoxyCompactList}\small\item\em Grabs image from queue between Image Transmission and Image Recognition, validates all pixel values, runs image through model to get prediction values, and runs the gesture command associated with the largest prediction value. \end{DoxyCompactList}\item 
+def \hyperlink{namespaceImageRecognition_a9709415793e740c3fb251cd22e053c17}{run\+Recognition} (pixel\+\_\+queue, error\+\_\+queue, model\+\_\+path, commands\+\_\+path)
+\begin{DoxyCompactList}\small\item\em Main method for image recognition. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{namespaceImageRecognition_ac1f31ba6524df5072a858f6cd67fd828}\label{namespaceImageRecognition_ac1f31ba6524df5072a858f6cd67fd828}} 
+float {\bfseries W\+H\+I\+T\+E\+\_\+\+C\+O\+L\+OR} = 255.\+0
+\item 
+\mbox{\Hypertarget{namespaceImageRecognition_a1b8728679ac6fffafc53d344dcb48b91}\label{namespaceImageRecognition_a1b8728679ac6fffafc53d344dcb48b91}} 
+float {\bfseries B\+L\+A\+C\+K\+\_\+\+C\+O\+L\+OR} = 0.\+0
+\item 
+\mbox{\Hypertarget{namespaceImageRecognition_a5a61b5e0edda4be185bdd9e43c49b940}\label{namespaceImageRecognition_a5a61b5e0edda4be185bdd9e43c49b940}} 
+int {\bfseries X\+\_\+\+O\+F\+\_\+\+I\+M\+A\+G\+ES} = 64
+\item 
+\mbox{\Hypertarget{namespaceImageRecognition_a8285c4b5f406b6b3dd9291271439c643}\label{namespaceImageRecognition_a8285c4b5f406b6b3dd9291271439c643}} 
+int {\bfseries Y\+\_\+\+O\+F\+\_\+\+I\+M\+A\+G\+ES} = 64
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Main file for the Image Recognition portion of the system. 
+
+Calling the \hyperlink{namespaceImageRecognition_a9709415793e740c3fb251cd22e053c17}{run\+Recognition()} method as a process will start Image Recognition and gather images from the pixel\+\_\+queue, process them, and call the appropriate gesture command. 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{namespaceImageRecognition_ae839052fe2fa16ffa7804966c331f792}\label{namespaceImageRecognition_ae839052fe2fa16ffa7804966c331f792}} 
+\index{Image\+Recognition@{Image\+Recognition}!init\+Recognition@{init\+Recognition}}
+\index{init\+Recognition@{init\+Recognition}!Image\+Recognition@{Image\+Recognition}}
+\subsubsection{\texorpdfstring{init\+Recognition()}{initRecognition()}}
+{\footnotesize\ttfamily def Image\+Recognition.\+init\+Recognition (\begin{DoxyParamCaption}\item[{}]{model\+\_\+path }\end{DoxyParamCaption})}
+
+
+
+Initializes the recognition part of the system and any variables, and loads the default model that was created earlier. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em model\+\_\+path} & Filepath to where the image recognition model is saved \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Loaded image recognition model 
+\end{DoxyReturn}
+\mbox{\Hypertarget{namespaceImageRecognition_af3a8ad13ef194bb7126f55c31eaa06db}\label{namespaceImageRecognition_af3a8ad13ef194bb7126f55c31eaa06db}} 
+\index{Image\+Recognition@{Image\+Recognition}!process\+Image@{process\+Image}}
+\index{process\+Image@{process\+Image}!Image\+Recognition@{Image\+Recognition}}
+\subsubsection{\texorpdfstring{process\+Image()}{processImage()}}
+{\footnotesize\ttfamily def Image\+Recognition.\+process\+Image (\begin{DoxyParamCaption}\item[{}]{pixel\+\_\+queue,  }\item[{}]{error\+\_\+queue,  }\item[{}]{model,  }\item[{}]{commands\+\_\+path,  }\item[{}]{new\+\_\+gesture }\end{DoxyParamCaption})}
+
+
+
+Grabs image from queue between Image Transmission and Image Recognition, validates all pixel values, runs image through model to get prediction values, and runs the gesture command associated with the largest prediction value. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pixel\+\_\+queue} & Queue of images from Image Transmission \\
+\hline
+{\em error\+\_\+queue} & Queue for error code/messages between Image Recognition and Image Transmission \\
+\hline
+{\em model\+\_\+path} & Filepath to where the image recognition model is saved \\
+\hline
+{\em commands\+\_\+path} & Filepath to where the command scripts are located \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Current status of the new\+\_\+gesture flag 
+\end{DoxyReturn}
+\mbox{\Hypertarget{namespaceImageRecognition_a9709415793e740c3fb251cd22e053c17}\label{namespaceImageRecognition_a9709415793e740c3fb251cd22e053c17}} 
+\index{Image\+Recognition@{Image\+Recognition}!run\+Recognition@{run\+Recognition}}
+\index{run\+Recognition@{run\+Recognition}!Image\+Recognition@{Image\+Recognition}}
+\subsubsection{\texorpdfstring{run\+Recognition()}{runRecognition()}}
+{\footnotesize\ttfamily def Image\+Recognition.\+run\+Recognition (\begin{DoxyParamCaption}\item[{}]{pixel\+\_\+queue,  }\item[{}]{error\+\_\+queue,  }\item[{}]{model\+\_\+path,  }\item[{}]{commands\+\_\+path }\end{DoxyParamCaption})}
+
+
+
+Main method for image recognition. 
+
+Loads the model and infinitely runs the process image method. 
+\begin{DoxyParams}{Parameters}
+{\em pixel\+\_\+queue} & Queue of images from Image Transmission \\
+\hline
+{\em error\+\_\+queue} & Queue for error code/messages between Image Recognition and Image Transmission \\
+\hline
+{\em model\+\_\+path} & Filepath to where the image recognition model is saved \\
+\hline
+{\em commands\+\_\+path} & Filepath to where the command scripts are located \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespaceImageRecognition_a29b55a32880e0e8ab9e35c25094e75c4}\label{namespaceImageRecognition_a29b55a32880e0e8ab9e35c25094e75c4}} 
+\index{Image\+Recognition@{Image\+Recognition}!validate\+Image@{validate\+Image}}
+\index{validate\+Image@{validate\+Image}!Image\+Recognition@{Image\+Recognition}}
+\subsubsection{\texorpdfstring{validate\+Image()}{validateImage()}}
+{\footnotesize\ttfamily def Image\+Recognition.\+validate\+Image (\begin{DoxyParamCaption}\item[{}]{image }\end{DoxyParamCaption})}
+
+
+
+Validates that all pixel values in the image are within valid pixel ranges, 0 and 255. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image} & Image from Image Transmission \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+1 if there is an invalid pixel value, 0 if all pixels are valid 
+\end{DoxyReturn}

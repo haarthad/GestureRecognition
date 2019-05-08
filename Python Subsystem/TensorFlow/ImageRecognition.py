@@ -1,9 +1,9 @@
-###############################################################################
+## @package ImageRecognition
 # Main file for the Image Recognition portion of the system. Calling the
 # runRecognition() method as a process will start Image Recognition and gather
 # images from the pixel_queue, process them, and call the appropriate gesture
 # command.
-###############################################################################
+#
 
 import sys
 sys.path.append("..")
@@ -17,21 +17,22 @@ from DeviceCommands import CalendarGrabber, TimeGrabber, SportsGrabber, \
                            Timer, WeatherGrabber
 import scipy.ndimage as nd
 
+
+# Defines
 WHITE_COLOR = 255.0
 BLACK_COLOR = 0.0
 X_OF_IMAGES = 64
 Y_OF_IMAGES = 64
 
-###############################################################################
-# Methods
-###############################################################################
 
-"""
-Initializes the recognition part of the system and any variables, and loads
-the default model that was created earlier.
-:param model_path Filepath to where the image recognition model is saved
-:return Loaded image recognition model
-"""
+# Methods
+
+
+##
+# Initializes the recognition part of the system and any variables, and loads
+# the default model that was created earlier.
+# @param model_path Filepath to where the image recognition model is saved
+# @return Loaded image recognition model
 def initRecognition(model_path):
     # Load image recognition model
     with CustomObjectScope({'GlorotUniform': glorot_uniform()}):
@@ -39,12 +40,12 @@ def initRecognition(model_path):
     print("IR - Successfully loaded model")
     return loaded_model
 
-"""
-Validates that all pixel values in the image are within valid pixel ranges,
-0 and 255.
-:param image Image from Image Transmission
-:return 1 if there is an invalid pixel value, 0 if all pixels are valid
-"""
+
+##
+# Validates that all pixel values in the image are within valid pixel ranges,
+# 0 and 255.
+# @param image Image from Image Transmission
+# @return 1 if there is an invalid pixel value, 0 if all pixels are valid
 def validateImage(image):
     if np.all(i <= WHITE_COLOR for i in image) and \
        np.all(i >= BLACK_COLOR for i in image):
@@ -53,18 +54,17 @@ def validateImage(image):
         return 1
 
 
-"""
-Grabs image from queue between Image Transmission and Image Recognition,
-validates all pixel values, runs image through model to get prediction
-values, and runs the gesture command associated with the largest prediction 
-value
-:param pixel_queue Queue of images from Image Transmission
-:param error_queue Queue for error code/messages between Image Recognition
-                   and Image Transmission
-:param model_path Filepath to where the image recognition model is saved
-:param commands_path Filepath to where the command scripts are located
-:returns Current status of the new_gesture flag
-"""
+##
+# Grabs image from queue between Image Transmission and Image Recognition,
+# validates all pixel values, runs image through model to get prediction
+# values, and runs the gesture command associated with the largest prediction
+# value
+# @param pixel_queue Queue of images from Image Transmission
+# @param error_queue Queue for error code/messages between Image Recognition
+#                    and Image Transmission
+# @param model_path Filepath to where the image recognition model is saved
+# @param commands_path Filepath to where the command scripts are located
+# @returns Current status of the new_gesture flag
 def processImage(pixel_queue, error_queue, model, commands_path, new_gesture):
     try:
         # Grab image from queue if any, timeout after 10 seconds
@@ -91,6 +91,7 @@ def processImage(pixel_queue, error_queue, model, commands_path, new_gesture):
     # Reformat image data to work with the model
     image = cv2.resize(image, (X_OF_IMAGES, Y_OF_IMAGES))
     image = image.reshape(-1, X_OF_IMAGES, Y_OF_IMAGES, 1)
+    print(image.shape)
     image = image / WHITE_COLOR
 
     # Run image through model and get a prediction
@@ -134,19 +135,17 @@ def processImage(pixel_queue, error_queue, model, commands_path, new_gesture):
     return new_gesture
 
 
-###############################################################################
 # Main logic
-###############################################################################
 
-"""
-Main method for image recognition. Loads the model and infinitely runs
-the process image method.
-:param pixel_queue Queue of images from Image Transmission
-:param error_queue Queue for error code/messages between Image Recognition
-                   and Image Transmission
-:param model_path Filepath to where the image recognition model is saved
-:param commands_path Filepath to where the command scripts are located
-"""
+
+##
+# Main method for image recognition. Loads the model and infinitely runs
+# the process image method.
+# @param pixel_queue Queue of images from Image Transmission
+# @param error_queue Queue for error code/messages between Image Recognition
+#                    and Image Transmission
+# @param model_path Filepath to where the image recognition model is saved
+# @param commands_path Filepath to where the command scripts are located
 def runRecognition(pixel_queue, error_queue, model_path, commands_path):
     # Wait for nothing category and then accept a gesture, repeat
     new_gesture = False
@@ -160,11 +159,3 @@ def runRecognition(pixel_queue, error_queue, model_path, commands_path):
                                    error_queue,
                                    image_recognition_model,
                                    commands_path, new_gesture)
-
-
-
-
-
-
-
-

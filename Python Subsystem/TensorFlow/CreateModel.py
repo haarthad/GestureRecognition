@@ -1,4 +1,4 @@
-###############################################################################
+## @package CreateModel
 # This file creates a CNN model, saved in the SavedModels folder, with training
 # images found in the ImageData/Training folder. It runs the images through
 # a complex TensorFlow model consisting of Convolution layers and Neural
@@ -18,7 +18,7 @@
 # Images in the training and test folder were gathered from the Jochen Triesch
 # Static Hand Posture Database and the Sebastien Marcel Static Hand Posture
 # Database based at http://www.idiap.ch/resource/gestures/
-###############################################################################
+#
 
 import cv2
 import numpy as np
@@ -30,39 +30,35 @@ from tensorflow import keras
 import matplotlib.pyplot as plt
 import scipy.ndimage as nd
 
-###############################################################################
+
 # Defines
-###############################################################################
 TRAINING_DATA =      'ImageData/Train'
 TESTING_DATA =       'ImageData/Test'
 EXTRA_TESTING_DATA = 'ImageData/ExtraTest'
 GESTURE_NAMES =      ['A', 'B', 'C', 'G', 'V', 'Nothing']
 X_OF_IMAGES =        64
 Y_OF_IMAGES =        64
-NUMBER_OF_EPOCHS =   20
+NUMBER_OF_EPOCHS =   30
 NUMBER_OF_GESTURES = 6
 BATCH_SIZE =         50
 WHITE_COLOR =        255.0
 
+
 # Transformation matrices
-matrix_rotate_right = cv2.getRotationMatrix2D((X_OF_IMAGES / 2, Y_OF_IMAGES / 2),
-                                              30, 1)
-matrix_rotate_left =  cv2.getRotationMatrix2D((X_OF_IMAGES / 2, Y_OF_IMAGES / 2),
-                                              -30, 1)
+matrix_rotate_right = cv2.getRotationMatrix2D((X_OF_IMAGES / 2, Y_OF_IMAGES / 2), 30, 1)
+matrix_rotate_left =  cv2.getRotationMatrix2D((X_OF_IMAGES / 2, Y_OF_IMAGES / 2), -30, 1)
 matrix_translate_top_left =  np.float32([[1, 0, -15], [0, 1,  15]])
 matrix_translate_top_right = np.float32([[1, 0,  15], [0, 1,  15]])
 matrix_translate_bot_left =  np.float32([[1, 0, -15], [0, 1, -15]])
 matrix_translate_bot_right = np.float32([[1, 0,  15], [0, 1, -15]])
 
-###############################################################################
-# Methods
-###############################################################################
-"""
-Returns the appropriate "hot" label for the provided image based on the
-filename.
-:param image: TensorFlow image to assign label to.
-:return: Label for the image
-"""
+
+##
+# Returns the appropriate "hot" label for the provided image based on the
+# filename.
+# @param image: TensorFlow image to assign label to.
+# @return Label for the image
+#
 def selectLabel(image):
     # Get beginning of filename. This defines each gesture is shown in the
     # image.
@@ -86,13 +82,13 @@ def selectLabel(image):
     return label
 
 
-"""
-Perform sobel, noise, rotation, and translation transformations on the
-provided image, and return an array of images that have the
-transformations applied.
-:param image: Image to be transformed
-:param path: Filepath to the image
-"""
+##
+# Perform sobel, noise, rotation, and translation transformations on the
+# provided image, and return an array of images that have the
+# transformations applied.
+# @param image: Image to be transformed
+# @param path: Filepath to the image
+#
 def imageTransformation(image,path):
     images = []
     noisy_image = image + np.random.normal(0.0, 10.0, image.shape)
@@ -171,11 +167,11 @@ def imageTransformation(image,path):
     return images
 
 
-"""
-Reads in all training images, and returns them as TensorFlow images with
-labels attached.
-:return: Training images with labels
-"""
+##
+# Reads in all training images, and returns them as TensorFlow images with
+# labels attached.
+# @return: Training images with labels
+#
 def loadTrainingData():
     train_images = []
     for i in tqdm(os.listdir(TRAINING_DATA)):
@@ -189,11 +185,11 @@ def loadTrainingData():
     return train_images
 
 
-"""
-Reads in all testing images, and returns them as TensorFlow images with
-labels attached.
-:return: Testing images with labels
-"""
+##
+# Reads in all testing images, and returns them as TensorFlow images with
+# labels attached.
+# @return: Testing images with labels
+#
 def loadTestingData():
     test_images = []
     for i in tqdm(os.listdir(TESTING_DATA)):
@@ -214,11 +210,11 @@ def loadTestingData():
     return test_images
 
 
-"""
-Reads in all personal testing images, and returns them as TensorFlow images
-with labels attached.
-:return: Personal testing images with labels
-"""
+##
+# Reads in all personal testing images, and returns them as TensorFlow images
+# with labels attached.
+# @return: Personal testing images with labels
+#
 def loadPersonalTestingData():
     personal_test_images = []
     for i in tqdm(os.listdir(EXTRA_TESTING_DATA)):
@@ -238,13 +234,14 @@ def loadPersonalTestingData():
     shuffle(personal_test_images)
     return personal_test_images
 
-"""
-Plots a single image with the predicted and real gesture underneath the image.
-:param i: Iteration number in array of images
-:param predictions_array: Array of gesture predictions percentages for image
-:param true_label: Correct gesture for the image provided
-:param img: Image to plot
-"""
+
+##
+# Plots a single image with the predicted and real gesture underneath the image.
+# @param i: Iteration number in array of images
+# @param predictions_array: Array of gesture predictions percentages for image
+# @param true_label: Correct gesture for the image provided
+# @param img: Image to plot
+#
 def plotImage(i, predictions_array, true_label, img):
     predictions_array = predictions_array[i]
     true_label = true_label[i]
@@ -268,12 +265,12 @@ def plotImage(i, predictions_array, true_label, img):
                                 color=color)
 
 
-"""
-Plots the gesture prediction percentages next to the image.
-:param i: Iteration number in array of images
-:param predictions_array: Array of gesture predictions percentages for image
-:param true_label: Correct gesture for the image provided
-"""
+##
+# Plots the gesture prediction percentages next to the image.
+# @param i: Iteration number in array of images
+# @param predictions_array: Array of gesture predictions percentages for image
+# @param true_label: Correct gesture for the image provided
+#
 def plotValueArray(i, predictions_array, true_label):
     predictions_array, true_label = predictions_array[i], true_label[i]
     plt.grid(False)
@@ -289,12 +286,12 @@ def plotValueArray(i, predictions_array, true_label):
     thisplot[np.argmax(true_label)].set_color('blue')
 
 
-"""
-Takes in a list of images, reshapes them to work with the convolution layers,
-applies a label to each image, and changes the value to be between 0 and 1.
-:param image_list List of images
-:return Reshaped images and their labels
-"""
+##
+# Takes in a list of images, reshapes them to work with the convolution layers,
+# applies a label to each image, and changes the value to be between 0 and 1.
+# @param image_list List of images
+# @return Reshaped images and their labels
+#
 def processImages(image_list):
     # Reshape images to be passed through the convolution layers
     images = np.array([i[0] for i in image_list]) \
@@ -306,10 +303,10 @@ def processImages(image_list):
 
     return images, labels
 
-"""
-Adds layers and other configuration settings to a model
-:return Model with layers and configuration
-"""
+
+##
+# Adds layers and other configuration settings to a model
+# @return Model with layers and configuration
 def setupModel():
     # Set parameters and layers for the model
     model = keras.models.Sequential([
@@ -354,14 +351,14 @@ def setupModel():
 
     return model
 
-"""
-Prints a 5x5 graph of images from the image_list with the predicted
-category, and the prediction values for the image for each category.
-:param model Model to predict images
-:param images Images to be predicted
-:param labels Labels for the images
-:param image_list Images to be printed
-"""
+
+##
+# Prints a 5x5 graph of images from the image_list with the predicted
+# category, and the prediction values for the image for each category.
+# @param model Model to predict images
+# @param images Images to be predicted
+# @param labels Labels for the images
+# @param image_list Images to be printed
 def printAccuracyGraph(model, images, labels, image_list):
     # Get category percentages for all test images
     predictions = model.predict(images)
@@ -380,47 +377,52 @@ def printAccuracyGraph(model, images, labels, image_list):
     plt.show()
 
 
-###############################################################################
-# Main logic
-###############################################################################
+##
+# Main logic of the script that reads in images, formats, creates model,
+# tests model, and then saves the model.
+def mainLogic():
 
-# Read in images and attach a label to each image
-training_image_list =      loadTrainingData()
-testing_image_list =       loadTestingData()
-extra_testing_image_list = loadPersonalTestingData()
+    # Read in images and attach a label to each image
+    training_image_list =      loadTrainingData()
+    testing_image_list =       loadTestingData()
+    extra_testing_image_list = loadPersonalTestingData()
 
-# Reshape images and preprocess values
-training_images, training_labels = processImages(training_image_list)
-testing_images, testing_labels = processImages(testing_image_list)
-extra_testing_images, extra_testing_labels = processImages(extra_testing_image_list)
+    # Reshape images and preprocess values
+    training_images, training_labels = processImages(training_image_list)
+    testing_images, testing_labels = processImages(testing_image_list)
+    extra_testing_images, extra_testing_labels = processImages(extra_testing_image_list)
 
-# Setup layers and other configuration settings for the model
-image_recognition_model = setupModel()
+    # Setup layers and other configuration settings for the model
+    image_recognition_model = setupModel()
 
-# Create model based on above parameters for the training images
-image_recognition_model.fit(training_images,
-                            training_labels,
-                            epochs=NUMBER_OF_EPOCHS,
-                            batch_size=BATCH_SIZE)
+    # Create model based on above parameters for the training images
+    image_recognition_model.fit(training_images,
+                                training_labels,
+                                epochs=NUMBER_OF_EPOCHS,
+                                batch_size=BATCH_SIZE)
 
-# Calculate and print accuracy for training, test, and personal test images
-training_loss, training_accuracy = image_recognition_model.evaluate(training_images,
-                                                  training_labels)
-testing_loss, testing_accuracy = image_recognition_model.evaluate(testing_images,
-                                                testing_labels)
-extra_loss, extra_accuracy = image_recognition_model.evaluate(extra_testing_images,
-                                                  extra_testing_labels)
+    # Calculate and print accuracy for training, test, and personal test images
+    training_loss, training_accuracy = image_recognition_model.evaluate(training_images,
+                                                      training_labels)
+    testing_loss, testing_accuracy = image_recognition_model.evaluate(testing_images,
+                                                    testing_labels)
+    extra_loss, extra_accuracy = image_recognition_model.evaluate(extra_testing_images,
+                                                      extra_testing_labels)
 
-# Print accuracy percentages for each image folder
-print('Training accuracy:', training_accuracy)
-print('Testing accuracy:', testing_accuracy)
-print('Extra testing accuracy:', extra_accuracy)
+    # Print accuracy percentages for each image folder
+    print('Training accuracy:', training_accuracy)
+    print('Testing accuracy:', testing_accuracy)
+    print('Extra testing accuracy:', extra_accuracy)
 
-# Print prediction values for each image in the ExtraTest folder
-printAccuracyGraph(image_recognition_model,
-                   extra_testing_images,
-                   extra_testing_labels,
-                   extra_testing_image_list)
+    # Print prediction values for each image in the ExtraTest folder
+    printAccuracyGraph(image_recognition_model,
+                       extra_testing_images,
+                       extra_testing_labels,
+                       extra_testing_image_list)
 
-# Save model
-image_recognition_model.save('./SavedModels/image_recognition_model.h5')
+    # Save model
+    image_recognition_model.save('./SavedModels/image_recognition_model.h5')
+
+
+if __name__ == "__main__":
+    mainLogic()
