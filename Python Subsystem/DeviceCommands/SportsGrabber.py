@@ -1,6 +1,10 @@
-#https://github.com/ddunkijaco/shellScores
+## @package SportsGrabber
+# Script that logs into google calendar through google apis and pulls the next 10 events from the 
+# user specified via credential files
+# https://github.com/ddunkijaco/shellScores
 # This module belongs to ddunkijaco on github
 #   It has been modified to work in Python 3
+#
 
 import datetime
 from xml.etree import ElementTree
@@ -13,16 +17,19 @@ parser.add_argument('-l')
 parser.add_argument('-t')
 parser.add_argument('-d')
 args = parser.parse_args()
-
 games = []
 home_score = []
 heading = []
 away_score = []
-
 today = str(datetime.date.today())
 yyyymmdd = today.replace('-', '')
 
-
+##
+# Pulls data from nbc sports and parameterizes it for easy display purposes.
+# @param date: Current date
+# @param league: Desired league
+# @param team: Desired team
+#
 def showBoxScore(date, league, team):
     header_space = ''
     header_print = ''
@@ -84,7 +91,12 @@ def showBoxScore(date, league, team):
                 print(home_nickname + ' |' + home_print)
                 break
 
-
+##
+# Inserts whitespace into strings for easy formatting 
+# @param scores: String containing team scores
+# @param attrib: String to replace with whitespace
+# @return spaced_scores: Formatted string
+#
 def insertWhitespace(scores, attrib):
     spaced_scores = []
     for score in scores:
@@ -96,7 +108,10 @@ def insertWhitespace(scores, attrib):
             spaced_scores.append('%s' % score.attrib.get(attrib))
     return spaced_scores
 
-
+##
+# Shows the scores for the list of desired leagues
+# @param leagues: List of leagues to analyze
+#
 def showScores(leagues):
     for league in range(len(leagues)):
         response = requests.get('http://wu.apple.com/' + leagues[league].lower() + '/bottomline/xml/scores')
@@ -105,7 +120,10 @@ def showScores(leagues):
         for game in events.iter("GAME"):
             printScore(game)
 
-
+##
+# Print the score on a per-game basis
+# @param game: Current game to print scores for
+#
 def printScore(game):
     home_team = game.find('./HOME/TEAM').text
     home_score = game.find('./HOME/SCORE').text
@@ -113,9 +131,16 @@ def printScore(game):
     away_score = game.find('./AWAY/SCORE').text
     game_status = game.find('./STATUS').text
     print("%s: %s, %s: %s. %s" % (away_team, away_score, home_team, home_score, game_status))
-	
+
+
+##
+# Calls of showScores() on list of all leagues to kickstart method
+#	
 def main():
 	showScores(['NFL', 'MLB', 'NHL', 'NBA', 'NCF'])	
 	
+##
+# Default main block
+#
 if __name__=="__main__":
 	showScores(['NFL', 'MLB', 'NHL', 'NBA', 'NCF'])

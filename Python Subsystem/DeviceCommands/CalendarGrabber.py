@@ -1,7 +1,7 @@
-##################################################################################################
+## @package CalendarGrabber
 # Script that logs into google calendar through google apis and pulls the next 10 events from the 
 # user specified via credential files
-##################################################################################################
+#
 
 from __future__ import print_function
 import datetime
@@ -13,14 +13,10 @@ import logging
 # If modifying these scopes, delete the file token.json.
 SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
 
-##################################################################################################
-# Main logic
-##################################################################################################
-
-"""
-pulls data from the specified user's calendar
-:param commands_path Path to token file
-"""
+##
+# Pulls data from the specified user's calendar
+# @param commands_path: Path to token file
+#
 def main(commands_path):
     """Shows basic usage of the Google Calendar API.
     Prints the start and name of the next 10 events on the user's calendar.
@@ -66,8 +62,8 @@ def main(commands_path):
         else:
             print(day, event['summary'])
 
-"""
-default main block
-"""
+##
+# default main block
+#
 if __name__ == '__main__':
     main("")

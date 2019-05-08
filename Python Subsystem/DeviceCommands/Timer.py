@@ -1,20 +1,16 @@
-#######################################################################
+## @package Timer
 # Displays a cocuntdown timer for 30 seconds and plays a tone at
 # its conclusion
-#######################################################################
+#
 
 import sys, time
 import pygame
 
-##################################################################################################
-# Methods
-##################################################################################################
-
-"""
-Method that prints a countdown timer to the console
-	has a duration of 30s and plays a tone at the end
-:param commands_path Directory storing sound bites folder
-"""
+##
+# Method that prints a countdown timer to the console
+#	has a duration of 30s and plays a tone at the end
+# @param commands_path: Directory storing sound bites folder
+#
 def Timer(commands_path):
     sec = 30
     min = 0
@@ -42,18 +38,14 @@ def Timer(commands_path):
     except pygame.error:
         print("Could not find an available audio device")
 
-##################################################################################################
-# Main logic
-##################################################################################################
-
-"""
-Calls Timer(0 in the working directory
-"""
+##
+# Calls Timer in the working directory
+#
 def main():
     Timer("")
 	
-"""
-Default main block
-"""
+##
+# Default main block
+#
 if __name__ == "__main__":
     main()
