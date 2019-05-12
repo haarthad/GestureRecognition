@@ -91,7 +91,6 @@ def processImage(pixel_queue, error_queue, model, commands_path, new_gesture):
     # Reformat image data to work with the model
     image = cv2.resize(image, (X_OF_IMAGES, Y_OF_IMAGES))
     image = image.reshape(-1, X_OF_IMAGES, Y_OF_IMAGES, 1)
-    print(image.shape)
     image = image / WHITE_COLOR
 
     # Run image through model and get a prediction

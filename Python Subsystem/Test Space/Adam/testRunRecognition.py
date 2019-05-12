@@ -1,8 +1,8 @@
-###############################################################################
+## @package testRunRecognition
 # This file tests the main method for the Image Recognition portion of the
 # system, runRecognition(), and in turn tests all the methods in the
 # ImageRecognition.py script.
-###############################################################################
+#
 
 import sys
 sys.path.append("../..")
@@ -13,23 +13,22 @@ import scipy.ndimage as nd
 import random
 from TensorFlow import ImageRecognition as ir
 
-"""
-Very basic implementation of what ImageTransmission is doing on the Pi side.
-:param pixel_queue Queue of images
-:param error_queue Holds error messages that go between ImageTransmission
-                   and ImageRecognition
-:param images Preloaded images to be put on pixel queue
-"""
+
+##
+# Very basic implementation of what ImageTransmission is doing on the Pi side.
+# @param pixel_queue Queue of images
+# @param error_queue Holds error messages that go between ImageTransmission
+#                    and ImageRecognition
+# @param images Preloaded images to be put on pixel queue
 def basicQueue(pixel_queue,error_queue,images):
     while True:
         pixel_queue.put(random.choice(images), True, 5)
 
 
-"""
-Pre loads specific images for this test.
-:return Returns an image from each gesture that has a sobel filter applied to
-        it
-"""
+##
+# Pre loads specific images for this test.
+# @return Returns an image from each gesture that has a sobel filter applied to
+#         it
 def loadImages():
     images = []
     sobel_images = []
@@ -63,21 +62,24 @@ def loadImages():
 # Main logic
 ###############################################################################
 
-# Preload images
-images = loadImages()
 
-# Start up a process for places images into the pixel queue, and a process
-# for image recognition.
-while True:
-    pixelQueue = Queue()
-    errorQueue = Queue()
-    p1 = Process(target=basicQueue,
-                 args=(pixelQueue, errorQueue, images))
-    p2 = Process(target=ir.runRecognition,
-                 args=(pixelQueue, errorQueue,
-                 '../../TensorFlow/SavedModels/image_recognition_model.h5',
-                 '../../DeviceCommands/'))
-    p1.start()
-    p2.start()
-    p1.join()
-    p2.join()
+if __name__ == "__main__":
+
+    # Preload images
+    images = loadImages()
+
+    # Start up a process for places images into the pixel queue, and a process
+    # for image recognition.
+    while True:
+        pixelQueue = Queue()
+        errorQueue = Queue()
+        p1 = Process(target=basicQueue,
+                     args=(pixelQueue, errorQueue, images))
+        p2 = Process(target=ir.runRecognition,
+                     args=(pixelQueue, errorQueue,
+                     '../../TensorFlow/SavedModels/image_recognition_model.h5',
+                     '../../DeviceCommands/'))
+        p1.start()
+        p2.start()
+        p1.join()
+        p2.join()

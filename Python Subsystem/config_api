@@ -1,6 +1,0 @@
-PROJECT_NAME = Gesture Recognition
-INPUT = DeviceCommandInterface DeviceCommands GPIO Logging TensorFlow
-OUTPUT_DIRECTORY = API
-GENERATE_HTML = YES
-HTML_OUTPUT = html/
-HTML_FILE_EXTENSIONS = .html

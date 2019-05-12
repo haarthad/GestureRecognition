@@ -4,5 +4,5 @@ var searchData=
   ['loadtestingdata',['loadTestingData',['../namespaceCreateModel.html#a6d6154f59653471f7fc359cca6daabff',1,'CreateModel']]],
   ['loadtrainingdata',['loadTrainingData',['../namespaceCreateModel.html#a13d98b7ab2f39bdfb831e2f87a299c7e',1,'CreateModel']]],
   ['logger',['Logger',['../classLogger_1_1Logger.html',1,'Logger']]],
-  ['logger',['Logger',['../md_Logging_README.html',1,'']]]
+  ['logger',['Logger',['../md__mnt_c_Users_Adam_Documents_GestureRecognition_Python_Subsystem_Logging_README.html',1,'']]]
 ];
