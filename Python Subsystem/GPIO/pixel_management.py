@@ -1,3 +1,8 @@
+## @package pixel_management
+# This file pulls in data off of the GPIO's and applies logic to 
+# the data to form a picture. That image is then put on a queue
+# for the tensorFlow portion of the project to grab when it is ready.
+
 # import the gpio library for the pi, print error if it can't.
 import gpio_management as gm
 import numpy as np

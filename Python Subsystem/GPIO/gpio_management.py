@@ -1,3 +1,6 @@
+## @package gpio_management
+# This file does the setup for all of the GPIO's that will be used.
+
 # import the gpio library for the pi, print error if it can't
 try:
     import RPi.GPIO as GPIO
