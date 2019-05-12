@@ -1,4 +1,4 @@
-## @package pixel_management_test
+## @package PixelManagementTest
 # This file replicates what the vhdl side of the project would do.
 # It pulls in images from a webcam and enqueus the pixel data for 
 # Pixel_management to pick up. 

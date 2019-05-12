@@ -1,8 +1,8 @@
 var searchData=
 [
-  ['loadpersonaltestingdata',['loadPersonalTestingData',['../namespaceCreateModel.html#a6b6cb30f9a38350655c81bf380898084',1,'CreateModel']]],
-  ['loadtestingdata',['loadTestingData',['../namespaceCreateModel.html#a6d6154f59653471f7fc359cca6daabff',1,'CreateModel']]],
-  ['loadtrainingdata',['loadTrainingData',['../namespaceCreateModel.html#a13d98b7ab2f39bdfb831e2f87a299c7e',1,'CreateModel']]],
-  ['logger',['Logger',['../classLogger_1_1Logger.html',1,'Logger']]],
-  ['logger',['Logger',['../md__mnt_c_Users_Adam_Documents_GestureRecognition_Python_Subsystem_Logging_README.html',1,'']]]
+  ['imagerecognition',['ImageRecognition',['../namespaceImageRecognition.html',1,'']]],
+  ['imagetransformation',['imageTransformation',['../namespaceCreateModel.html#afbe2ef216c8769c9300c48038330bdce',1,'CreateModel']]],
+  ['initrecognition',['initRecognition',['../namespaceImageRecognition.html#ae839052fe2fa16ffa7804966c331f792',1,'ImageRecognition']]],
+  ['inputconversion',['inputConversion',['../namespacePixelManagement.html#ae7f9ad24d002aaecf0201fc4e7a5f9a0',1,'PixelManagement.inputConversion()'],['../namespacePixelManagementTest.html#a13f20dd13a504e41df4c41740e0fb48e',1,'PixelManagementTest.inputConversion()']]],
+  ['insertwhitespace',['insertWhitespace',['../namespaceSportsGrabber.html#a533631788cbd1858753150480ac1da85',1,'SportsGrabber']]]
 ];

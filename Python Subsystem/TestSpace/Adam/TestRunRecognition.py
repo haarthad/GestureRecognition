@@ -1,4 +1,4 @@
-## @package testRunRecognition
+## @package TestRunRecognition
 # This file tests the main method for the Image Recognition portion of the
 # system, runRecognition(), and in turn tests all the methods in the
 # ImageRecognition.py script.

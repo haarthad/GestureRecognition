@@ -1,4 +1,4 @@
-## package @pi_main
+## @package PiMain
 # This file creates all the processes for the Python Subsystem,
 # including GPIO and TensorFlow. This is the only script that
 # needs to be run on the Pi.
@@ -6,7 +6,7 @@
 
 from multiprocessing import Process, Queue
 from TensorFlow import ImageRecognition as ir
-from GPIO import pixel_management as pm
+from GPIO import PixelManagement as pm
 
 
 ##

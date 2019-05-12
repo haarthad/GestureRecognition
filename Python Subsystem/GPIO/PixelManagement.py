@@ -1,4 +1,4 @@
-## @package pixel_management
+## @package PixelManagement
 # This file pulls in data off of the GPIO's and applies logic to 
 # the data to form a picture. That image is then put on a queue
 # for the tensorFlow portion of the project to grab when it is ready.

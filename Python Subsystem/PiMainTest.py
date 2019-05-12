@@ -1,4 +1,4 @@
-## package @pi_main_test
+## @package PiMainTest
 # This file is made to test all parts of the Python Subsystem by
 # mimicking images being transmitted from the FPGA to the PI, and
 # then receiving that image, processing it, and calling the
@@ -6,7 +6,7 @@
 
 from multiprocessing import Process, Queue
 from TensorFlow import ImageRecognition as ir
-from GPIO import pixel_management_test as pm
+from GPIO import PixelManagementTest as pm
 
 
 ##

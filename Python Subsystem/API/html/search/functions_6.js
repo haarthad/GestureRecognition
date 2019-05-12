@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['validateimage',['validateImage',['../namespaceImageRecognition.html#a29b55a32880e0e8ab9e35c25094e75c4',1,'ImageRecognition']]]
+  ['runrecognition',['runRecognition',['../namespaceImageRecognition.html#a9709415793e740c3fb251cd22e053c17',1,'ImageRecognition']]]
 ];

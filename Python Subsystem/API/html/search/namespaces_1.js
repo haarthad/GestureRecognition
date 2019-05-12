@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['imagerecognition',['ImageRecognition',['../namespaceImageRecognition.html',1,'']]]
+  ['gpiomanagement',['GpioManagement',['../namespaceGpioManagement.html',1,'']]]
 ];

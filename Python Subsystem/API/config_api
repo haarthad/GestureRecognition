@@ -1,5 +1,5 @@
 PROJECT_NAME = Gesture Recognition
-INPUT = ../DeviceCommandInterface ../DeviceCommands ../GPIO ../Logging ../TensorFlow
+INPUT = ../DeviceCommandInterface ../DeviceCommands ../GPIO ../Logging ../TensorFlow "../Test Space/Adam" ../
 OUTPUT_DIRECTORY = ../API
 GENERATE_HTML = YES
 HTML_OUTPUT = html/

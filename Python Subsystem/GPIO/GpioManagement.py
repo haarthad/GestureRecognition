@@ -1,4 +1,4 @@
-## @package gpio_management
+## @package GpioManagement
 # This file does the setup for all of the GPIO's that will be used.
 
 # import the gpio library for the pi, print error if it can't
