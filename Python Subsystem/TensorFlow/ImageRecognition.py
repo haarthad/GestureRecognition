@@ -97,6 +97,7 @@ def processImage(pixel_queue, error_queue, model, commands_path, new_gesture):
     prediction = model.predict(image)
 
     # See what the model predicts with the highest percentage
+    print("Percentage of gesture predicted: " + np.axam(prediction))
     predicted_gesture = np.argmax(prediction[0])
 
     # Call correct command for the predicted gesture

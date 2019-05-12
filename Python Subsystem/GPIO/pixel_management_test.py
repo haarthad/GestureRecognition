@@ -17,8 +17,8 @@ def inputConversion(channel):
         return 1
     else:
         return 0
-		
-		
+
+
 ##
 # Main function that pulls the pixel values and stores them into a list.
 # @param pixel queue, stable queue, finished queue, send queue
@@ -54,13 +54,12 @@ def picSender(pixel_queue, stable_queue, finished_queue):
     camera = cv2.VideoCapture(0)
     sleep(1)
     while 1:
-            sleep(1)
             print("Perform Gesture.")
-            sleep(3)
+            sleep(2)
             # Get most recent image in video buffer
             # This is done due to the slow execution on the pi
             image = None
-            for i in range(10):
+            for i in range(20):
                 ret, image = camera.read()
 
             if image is not None:
@@ -70,6 +69,7 @@ def picSender(pixel_queue, stable_queue, finished_queue):
                 image = cv2.flip(image,0)
                 image = cv2.flip(image,1)
                 cv2.imshow('Image',image)
+                cv2.waitKey(1)
                 image = cv2.resize(image,(64,64))
                 i = 0
                 while i < 64:
