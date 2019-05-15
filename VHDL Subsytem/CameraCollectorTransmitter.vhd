@@ -308,11 +308,11 @@ BEGIN
 				transmit_delay <= 0;
 				send_count <= send_count + 1;
 			ELSE
-				IF(transmit_delay < 100) THEN
+				IF(transmit_delay < 10) THEN
 					--o_pixel_data <= sram_wire;
 					transmit_delay <= transmit_delay + 1;
 					o_valid_pixel <= o_valid_pixel;
-				ELSIF(transmit_delay = 100) THEN
+				ELSIF(transmit_delay = 10) THEN
 					--o_pixel_data <= o_pixel_data;
 					o_valid_pixel <= NOT o_valid_pixel;
 					transmit_delay <= transmit_delay + 1;
@@ -372,8 +372,5 @@ i_read_edge2 <= i_read_delayed AND NOT i_pixel_read;
 o_finished <= i_finished;
 
 o_edgeTest <= i_read_edge;
-
---look at rowCount to see which buffer we are using. If rowCount is 0 or 1, we are in front buffer,
---if rowCount is 2 or 3, we are in back buffer.
 
 END structural;

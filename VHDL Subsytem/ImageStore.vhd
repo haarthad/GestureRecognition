@@ -117,14 +117,6 @@ BEGIN
 ----------========================================
 ---------- debugging ram
 ----------========================================
---debugRam: single_port_ram
---PORT MAP(
---	data => data_debug,
---	addr => addr_debug,
---	we   => we_debug,
---	clk  => clk_debug,
---	q    => q_debug
---);
 altsyncram_debugging : altsyncram
 	GENERIC MAP (
 		operation_mode => "SINGLE_PORT",
@@ -283,13 +275,18 @@ BEGIN
 	END IF;
 END PROCESS;
 
+
+--grayscaling : PROCESS(i_clk)
+--BEGIN
+--	IF(RISING_EDGE(i_clk)) THEN
+		o_selectA <= STD_LOGIC_VECTOR(TO_UNSIGNED(regA, o_selectA'LENGTH));
+		o_selectB <= STD_LOGIC_VECTOR(TO_UNSIGNED(regB, o_selectB'LENGTH));
+		o_selectC <= STD_LOGIC_VECTOR(TO_UNSIGNED(regC, o_selectC'LENGTH));
+		o_selectD <= STD_LOGIC_VECTOR(TO_UNSIGNED(regD, o_selectD'LENGTH));
+--	END IF;
+--END PROCESS;
+
 greyscalePixel <= greyscaleTemp(9 downto 2);--(11 DOWNTO 4);
-
-o_selectA <= STD_LOGIC_VECTOR(TO_UNSIGNED(regA, o_selectA'LENGTH));
-o_selectB <= STD_LOGIC_VECTOR(TO_UNSIGNED(regB, o_selectB'LENGTH));
-o_selectC <= STD_LOGIC_VECTOR(TO_UNSIGNED(regC, o_selectC'LENGTH));
-o_selectD <= STD_LOGIC_VECTOR(TO_UNSIGNED(regD, o_selectD'LENGTH));
-
 i_regA_math <= "00" & i_regA;
 i_regB_math <= "00" & i_regB;
 i_regC_math <= "00" & i_regC;

@@ -88,7 +88,7 @@ signal S_DATA_RD   : std_logic_vector(7 downto 0);
 signal S_ACK_ERROR : std_logic;
 
 --Programmer state declarations
-type PROGRAM_STATE is (START, ROW_SIZE, ROW_SIZE_ACTUAL, COL_SIZE, ROW_SKIP, COL_SKIP, DONE);
+type PROGRAM_STATE is (START, ROW_SIZE, ROW_SIZE_ACTUAL, COL_SIZE, ROW_SKIP, COL_SKIP, TEST_PATTERN, TEST_WIDTH, TEST_GREEN, TEST_BLUE, DONE);
 signal STATE : PROGRAM_STATE := START;
 type STEP_STATE is (ADDRESS, MSB, LSB, FINISH);
 signal IIC_STATE: STEP_STATE := ADDRESS;
@@ -97,22 +97,33 @@ signal IIC_STATE: STEP_STATE := ADDRESS;
 signal PREV_BUSY   : std_logic := '0';
 
 --Program value declarations
-constant WRITE_BIT    : std_logic := '0';
-constant READ_BIT     : std_logic := '1';
-constant CAMERA_ADDR  : std_logic_vector(6 downto 0) := "1011101";  --0x5D
-constant REG_ROW_SIZE : std_logic_vector(7 downto 0) := "00000011"; --0x03
-constant REG_COL_SIZE : std_logic_vector(7 downto 0) := "00000100"; --0x04
-constant REG_ROW_SKIP : std_logic_vector(7 downto 0) := "00100010"; --0x22
-constant REG_COL_SKIP : std_logic_vector(7 downto 0) := "00100011"; --0x23
-constant ROW_SIZE_MSB : std_logic_vector(7 downto 0) := "00000111"; --0x07
-constant ROW_SIZE_LSB : std_logic_vector(7 downto 0) := "01111111"; --0x7F
-constant COL_SIZE_MSB : std_logic_vector(7 downto 0) := "00001001"; --0x09
-constant COL_SIZE_LSB : std_logic_vector(7 downto 0) := "11111111"; --0xFF
-constant ROW_SKIP_MSB : std_logic_vector(7 downto 0) := "00000000"; --0x00
-constant ROW_SKIP_LSB : std_logic_vector(7 downto 0) := "00000011"; --0x03
-constant COL_SKIP_MSB : std_logic_vector(7 downto 0) := "00000000"; --0x00
-constant COL_SKIP_LSB : std_logic_vector(7 downto 0) := "00000011"; --0x03
-
+constant WRITE_BIT        : std_logic := '0';
+constant READ_BIT         : std_logic := '1';
+constant CAMERA_ADDR      : std_logic_vector(6 downto 0) := "1011101";  --0x5D
+constant REG_ROW_SIZE     : std_logic_vector(7 downto 0) := "00000011"; --0x03
+constant REG_COL_SIZE     : std_logic_vector(7 downto 0) := "00000100"; --0x04
+constant REG_ROW_SKIP     : std_logic_vector(7 downto 0) := "00100010"; --0x22
+constant REG_COL_SKIP     : std_logic_vector(7 downto 0) := "00100011"; --0x23
+constant ROW_SIZE_MSB     : std_logic_vector(7 downto 0) := "00000111"; --0x07
+constant ROW_SIZE_LSB     : std_logic_vector(7 downto 0) := "01111111"; --0x7F
+constant COL_SIZE_MSB     : std_logic_vector(7 downto 0) := "00001001"; --0x09
+constant COL_SIZE_LSB     : std_logic_vector(7 downto 0) := "11111111"; --0xFF
+constant ROW_SKIP_MSB     : std_logic_vector(7 downto 0) := "00000000"; --0x00
+constant ROW_SKIP_LSB     : std_logic_vector(7 downto 0) := "00000011"; --0x03
+constant COL_SKIP_MSB     : std_logic_vector(7 downto 0) := "00000000"; --0x00
+constant COL_SKIP_LSB     : std_logic_vector(7 downto 0) := "00000011"; --0x03
+constant REG_TEST_PATTERN : std_logic_vector(7 downto 0) := "10100000"; --0xA0
+constant TEST_PATTERN_MSB : std_logic_vector(7 downto 0) := "00000000"; --vertical bars and test enable 
+constant TEST_PATTERN_LSB : std_logic_vector(7 downto 0) := "00110001"; --vertical bars and test enable "00111001 --horizontal bars is "00110001"
+constant REG_TEST_WIDTH   : std_logic_vector(7 downto 0) := "10100100"; --0xA4
+constant TEST_WIDTH_MSB   : std_logic_vector(7 downto 0) := "00000000"; --0x00
+constant TEST_WIDTH_LSB   : std_logic_vector(7 downto 0) := "00001011"; --0x0B
+constant REG_TEST_GREEN   : std_logic_vector(7 downto 0) := "10100001"; --0xA1
+constant TEST_GREEN_MSB   : std_logic_vector(7 downto 0) := "00001111"; --0x0F
+constant TEST_GREEN_LSB   : std_logic_vector(7 downto 0) := "11111111"; --0xFF
+constant REG_TEST_BLUE    : std_logic_vector(7 downto 0) := "10100011"; --0xA3
+constant TEST_BLUE_MSB    : std_logic_vector(7 downto 0) := "00000000"; --0x00
+constant TEST_BLUE_LSB    : std_logic_vector(7 downto 0) := "00000000"; --0x00
 --Verification read bit declarations
 signal ROW_SIZE_RD : std_logic_vector(15 downto 0) := "0000000000000000";
 signal COL_SIZE_RD : std_logic_vector(15 downto 0) := "0000000000000000";
@@ -372,13 +383,199 @@ begin
 						S_ENA <= '0';
 						if(PREV_BUSY = '1' and S_BUSY = '0') then
 							IIC_STATE <= ADDRESS;
-							STATE     <= DONE;                         --CHANGE: Next command
+							STATE     <= TEST_PATTERN;                         --CHANGE: Next command
+						else
+							IIC_STATE <= FINISH;
+							STATE     <= STATE;
+						end if;
+				end case;
+				
+			--Send the test pattern settings to the camera
+			when TEST_PATTERN =>
+				--Write data
+				case IIC_STATE is
+					
+					when ADDRESS =>
+						S_ENA     <= '1';
+						S_RW      <= WRITE_BIT;
+						S_DATA_WR <= REG_TEST_PATTERN;                 --CHANGE: Register to change
+						if(PREV_BUSY = '0' and S_BUSY = '1') then
+							IIC_STATE <= MSB;
+						else
+							IIC_STATE <= ADDRESS;
+						end if;
+						
+					when MSB =>
+						S_ENA     <= '1';
+						S_RW      <= WRITE_BIT;
+						S_DATA_WR <= TEST_PATTERN_MSB;                    --CHANGE: Register MSB
+						if(PREV_BUSY = '0' and S_BUSY = '1') then
+							IIC_STATE <= LSB;
+						else
+							IIC_STATE <= MSB;
+						end if;
+					
+					when LSB =>
+						S_ENA     <= '1';
+						S_RW      <= WRITE_BIT;
+						S_DATA_WR <= TEST_PATTERN_LSB;                    --CHANGE: Register LSB
+						if(PREV_BUSY = '0' and S_BUSY = '1') then
+							IIC_STATE <= FINISH;
+						else
+							IIC_STATE <= LSB;
+						end if;
+						
+					when FINISH =>
+						S_ENA <= '0';
+						if(PREV_BUSY = '1' and S_BUSY = '0') then
+							IIC_STATE <= ADDRESS;
+							STATE     <= TEST_WIDTH;                         --CHANGE: Next command
 						else
 							IIC_STATE <= FINISH;
 							STATE     <= STATE;
 						end if;
 				end case;
 			
+			--Send the test pattern bar width to camera
+			when TEST_WIDTH =>
+				
+				--Write data
+				case IIC_STATE is
+					
+					when ADDRESS =>
+						S_ENA     <= '1';
+						S_RW      <= WRITE_BIT;
+						S_DATA_WR <= REG_TEST_WIDTH;                  --CHANGE: Register to change
+						if(PREV_BUSY = '0' and S_BUSY = '1') then
+							IIC_STATE <= MSB;
+						else
+							IIC_STATE <= ADDRESS;
+						end if;
+						
+					when MSB =>
+						S_ENA     <= '1';
+						S_RW      <= WRITE_BIT;
+						S_DATA_WR <= TEST_WIDTH_MSB;                    --CHANGE: Register MSB
+						if(PREV_BUSY = '0' and S_BUSY = '1') then
+							IIC_STATE <= LSB;
+						else
+							IIC_STATE <= MSB;
+						end if;
+						
+					when LSB =>
+						S_ENA     <= '1';
+						S_RW      <= WRITE_BIT;
+						S_DATA_WR <= TEST_WIDTH_LSB;                    --CHANGE: Register LSB
+						if(PREV_BUSY = '0' and S_BUSY = '1') then
+							IIC_STATE <= FINISH;
+						else
+							IIC_STATE <= LSB;
+						end if;
+						
+					when FINISH =>
+						S_ENA <= '0';
+						if(PREV_BUSY = '1' and S_BUSY = '0') then
+							IIC_STATE <= ADDRESS;
+							STATE     <= TEST_GREEN;                     --CHANGE: Next command
+						else
+							IIC_STATE <= FINISH;
+							STATE     <= STATE;
+						end if;
+				end case;
+				
+			--Send the test pattern bar width to camera
+			when TEST_GREEN =>
+				
+				--Write data
+				case IIC_STATE is
+					
+					when ADDRESS =>
+						S_ENA     <= '1';
+						S_RW      <= WRITE_BIT;
+						S_DATA_WR <= REG_TEST_GREEN;                  --CHANGE: Register to change
+						if(PREV_BUSY = '0' and S_BUSY = '1') then
+							IIC_STATE <= MSB;
+						else
+							IIC_STATE <= ADDRESS;
+						end if;
+						
+					when MSB =>
+						S_ENA     <= '1';
+						S_RW      <= WRITE_BIT;
+						S_DATA_WR <= TEST_GREEN_MSB;                    --CHANGE: Register MSB
+						if(PREV_BUSY = '0' and S_BUSY = '1') then
+							IIC_STATE <= LSB;
+						else
+							IIC_STATE <= MSB;
+						end if;
+						
+					when LSB =>
+						S_ENA     <= '1';
+						S_RW      <= WRITE_BIT;
+						S_DATA_WR <= TEST_GREEN_LSB;                    --CHANGE: Register LSB
+						if(PREV_BUSY = '0' and S_BUSY = '1') then
+							IIC_STATE <= FINISH;
+						else
+							IIC_STATE <= LSB;
+						end if;
+						
+					when FINISH =>
+						S_ENA <= '0';
+						if(PREV_BUSY = '1' and S_BUSY = '0') then
+							IIC_STATE <= ADDRESS;
+							STATE     <= TEST_BLUE;                     --CHANGE: Next command
+						else
+							IIC_STATE <= FINISH;
+							STATE     <= STATE;
+						end if;
+				end case;
+				
+			--Send the test pattern bar width to camera
+			when TEST_BLUE =>
+				
+				--Write data
+				case IIC_STATE is
+					
+					when ADDRESS =>
+						S_ENA     <= '1';
+						S_RW      <= WRITE_BIT;
+						S_DATA_WR <= REG_TEST_BLUE;                  --CHANGE: Register to change
+						if(PREV_BUSY = '0' and S_BUSY = '1') then
+							IIC_STATE <= MSB;
+						else
+							IIC_STATE <= ADDRESS;
+						end if;
+						
+					when MSB =>
+						S_ENA     <= '1';
+						S_RW      <= WRITE_BIT;
+						S_DATA_WR <= TEST_BLUE_MSB;                    --CHANGE: Register MSB
+						if(PREV_BUSY = '0' and S_BUSY = '1') then
+							IIC_STATE <= LSB;
+						else
+							IIC_STATE <= MSB;
+						end if;
+						
+					when LSB =>
+						S_ENA     <= '1';
+						S_RW      <= WRITE_BIT;
+						S_DATA_WR <= TEST_BLUE_LSB;                    --CHANGE: Register LSB
+						if(PREV_BUSY = '0' and S_BUSY = '1') then
+							IIC_STATE <= FINISH;
+						else
+							IIC_STATE <= LSB;
+						end if;
+						
+					when FINISH =>
+						S_ENA <= '0';
+						if(PREV_BUSY = '1' and S_BUSY = '0') then
+							IIC_STATE <= ADDRESS;
+							STATE     <= DONE;                     --CHANGE: Next command
+						else
+							IIC_STATE <= FINISH;
+							STATE     <= STATE;
+						end if;
+				end case;
 			
 			when DONE =>
 				STATE <= DONE;
