@@ -32,7 +32,7 @@ def Timer(commands_path):
 	# https://stackoverflow.com/questions/2936914/pygame-sounds-dont-play
     try:
         pygame.mixer.init()
-        sound = pygame.mixer.Sound(commands_path + 'Assets\Slrt.wav')
+        sound = pygame.mixer.Sound(commands_path + 'Assets/Slrt.wav')
         sound.play()
         time.sleep(3)
     except pygame.error:
@@ -41,8 +41,8 @@ def Timer(commands_path):
 ##
 # Calls Timer in the working directory
 #
-def main():
-    Timer("")
+def main(command_path):
+    Timer(command_path)
 	
 ##
 # Default main block

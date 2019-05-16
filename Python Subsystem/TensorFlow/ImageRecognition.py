@@ -97,14 +97,15 @@ def processImage(pixel_queue, error_queue, model, commands_path, new_gesture):
     prediction = model.predict(image)
 
     # See what the model predicts with the highest percentage
-    print("Percentage of gesture predicted: " + str(np.amax(prediction)))
+    percentage = np.amax(prediction)
+    print("Percentage of gesture predicted: " + str(percentage))
     predicted_gesture = np.argmax(prediction[0])
 
     # Call correct command for the predicted gesture
-    if new_gesture:
+    if new_gesture and (percentage > 0.70):
         if predicted_gesture == 0:
             print("IR - Gesture A")
-            Timer.main()
+            Timer.main("DeviceCommands/")
         elif predicted_gesture == 1:
             print("IR - Gesture B")
             TimeGrabber.main()
