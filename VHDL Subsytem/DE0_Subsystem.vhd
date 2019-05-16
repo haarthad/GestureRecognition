@@ -1,3 +1,27 @@
+--Component: DE0_Subsystem 
+--Description: The toplevel of the DE0_Subsystem. 
+--             This interfaces to the physical DE0 Nano SoC pins and is responsible 
+--             for routing signals from the camera and to/from the Raspberry Pi to/from 
+--             the components concerned with those signals. 
+--INPUTS:
+--i_rst_n
+--i_rst_n      
+--i_clk50mhz   
+--i_clk        
+--i_pixel_data 
+--i_lval       
+--i_fval       
+--i_pixel_read 
+--o_rst_n      
+--o_xclk       
+--o_sclk       
+--o_sdata      
+--o_pixel_data  : 
+--o_valid_frame : a picture is being transmitted from the FPGA
+--o_valid_pixel : toggles when a new pixel is placed on the data lines
+--o_sobel_en    : a test signal
+--o_finished    : a test signal
+
 LIBRARY ieee;
 USE ieee. std_logic_1164.all;
 USE ieee.numeric_std.all;

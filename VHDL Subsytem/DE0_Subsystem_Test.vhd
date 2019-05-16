@@ -3,7 +3,32 @@
 --Description: Test version of the DE0_Subsystem which
 --					does not gather pixels from the camera but instead
 --					sends all black pixels to the camera with a white
---					vertical strip of pixels
+--					vertical strip of pixels. This is the toplevel of the DE0_Subsystem. 
+--             This interfaces to the physical DE0 Nano SoC pins and is responsible 
+--             for routing signals from the camera and to/from the Raspberry Pi to/from 
+--             the components concerned with those signals. 
+--INPUTS
+--i_rst_n        : an active-low global reset signal 
+--i_clk50mhz     : the 50MHz input clock
+--i_clk          : the input clock which drives the DE0_Subsystem
+--i_pixel_data   : pixel data coing from the camera
+--i_lval         : lval signal coming from the camera
+--i_fval         : fval signal coming from teh camera
+--i_pixel_read   : i_pixel_read signal coming from the Raspberry Pi
+--io_sclk        : serial clock used for I2C communication with camera
+--io_sdata       : I2C data fro communication with camera
+--o_rst_n        : active low reset signal for the camera
+--o_xclk         : output clock which drives the camera
+--o_pixel_data   : pixel data output to the Raspberry Pi
+--o_valid_frame  : valid frame signal output to the Raspberry Pi
+--o_valid_pixel  : valid pixel signal output to the Raspberry Pi. Toggles when valid.
+--o_sobel_en     : test signal
+--o_edgeTest     : test signal
+--O_ROW_SIZE_LED : test LED signal
+--O_COL_SIZE_LED : test LED signal
+--O_ROW_SKIP_LED : test LED signal
+--O_COL_SKIP_LED : test LED signal
+--O_ACK_ERR_LED  : test LED signal
 
 LIBRARY ieee;
 USE ieee. std_logic_1164.all;

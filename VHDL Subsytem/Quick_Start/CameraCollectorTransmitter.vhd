@@ -1,29 +1,28 @@
 --Owner: Senior Design Team Delta
---Component: Camera Collector and Transmitter
+--Component: CameraCollectorTransmitter
 --Description: After the camera is configured, this component monitors the
---             camera outputs and grabs image data when valid. This component
---             only grabs the data, and then passes the data along to another
---             component.
---             This component is designed for use with the TRDB-D5M
---             camera from Altera 
+--             camera outputs and grabs image data when valid. 
+--             This component only grabs the data, and then passes the data along 
+--             to ImageStore for conversion and storage. When collection is done, 
+--             this component transmits the stored image. This component is designed 
+--             for use with the TRDB-D5M camera from Altera. 
 --Author: Michael Dougherty
 --Start Date: 12/2/2018
-
 --INPUTS:
 --i_clk        : input clock (50 MHz) from camera pclk
---i_pixclk     : clock from camera for latching pixel data
 --i_en         : enable collection of pixel data from the camera
---i_pixel_data : the pixel information output by the D5M at each epoch
+--i_pixel_data : the pixel information output by the D5M
 --i_lval       : line-valid signal from the D5M
 --i_fval       : frame_valid signal from the D5M
 --i_pixel_read : from the transmission pins, signalling a pixel has been recieved
+--OUTPUTS:
 --o_pixel_data : the greyscale pixel output to the transmission pins
 --o_valid_frame: signals that frame is being transmitted
 --o_valid_pixel: signals that pixel on transmission pins is valid
---i_finished   : pulse triggers a reset and new image collection/transfer
+--o_sobel_en   : for testing
+--o_finished   : for testing
+--o_edgeTest   : for testing
 --***See TRDB-D5M Hardware Specification page 5 for further detail of D5M signals***
---OUTPUTS:
---
 
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
